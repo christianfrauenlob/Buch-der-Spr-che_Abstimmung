@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sprüche – Elberfelder 1905</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.js"></script>
+<style>
+/* ══════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════ */
+:root {
+  --bg:        #faf8f4;
+  --bg2:       #f3f0ea;
+  --bg3:       #e8e0d0;
+  --card:      #fffdf9;
+  --text:      #2c2416;
+  --muted:     #7a6e5e;
+  --accent:    #8b6914;
+  --accent2:   #c49a2a;
+  --green:     #2d7a40;
+  --green-bg:  #d4edda;
+  --green-mid: #3a9a52;
+  --border:    #ddd6c8;
+  --shadow:    0 2px 16px rgba(44,36,22,.10);
+  --shadow-sm: 0 1px 6px rgba(44,36,22,.07);
+  --r:         10px;
+  --ff-body:   'EB Garamond', Georgia, serif;
+  --ff-disp:   'Cinzel', serif;
+  --trans:     .2s cubic-bezier(.4,0,.2,1);
+  --topbar-h:  56px;
+  --tabbar-h:  48px;
+  --botbar-h:  56px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; overflow: hidden;
+  background: var(--bg); color: var(--text);
+  font-family: var(--ff-body); font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══════════════════════════════════════════
+   TOP BAR
+══════════════════════════════════════════ */
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  background: var(--card); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 14px; z-index: 100; box-shadow: var(--shadow-sm);
+  gap: 8px;
+}
+.logo { font-family: var(--ff-disp); font-size: 14px; color: var(--accent); letter-spacing: .07em; white-space: nowrap; }
+.logo small { font-size: 11px; color: var(--muted); display: block; letter-spacing: .12em; text-transform: uppercase; margin-top: 1px; }
+
+/* chapter nav — only visible in reader tab */
+#ch-nav { display: flex; align-items: center; gap: 6px; }
+.nav-btn {
+  width: 34px; height: 34px; border: 1px solid var(--border); border-radius: 50%;
+  background: var(--bg); color: var(--accent); font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--trans), color var(--trans); user-select: none; flex-shrink: 0;
+}
+.nav-btn:hover { background: var(--accent); color: #fff; }
+.nav-btn:active { transform: scale(.93); }
+.nav-btn:disabled { opacity: .3; cursor: not-allowed; }
+.nav-btn:disabled:hover { background: var(--bg); color: var(--accent); }
+#ch-indicator {
+  font-family: var(--ff-disp); font-size: 14px; color: var(--text);
+  min-width: 88px; text-align: center; cursor: pointer;
+  padding: 4px 8px; border-radius: 6px; transition: background var(--trans);
+}
+#ch-indicator:hover { background: var(--bg2); }
+
+/* user pill */
+#user-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border: 1px solid var(--border); border-radius: 20px;
+  background: var(--bg2); cursor: pointer; font-size: 13px; color: var(--muted);
+  transition: background var(--trans); white-space: nowrap; flex-shrink: 0;
+}
+#user-pill:hover { background: var(--bg3); }
+#user-pill strong { color: var(--text); }
+
+/* ══════════════════════════════════════════
+   TAB BAR
+══════════════════════════════════════════ */
+#tabbar {
+  position: fixed; top: var(--topbar-h); left: 0; right: 0;
+  height: var(--tabbar-h);
+  background: var(--card); border-bottom: 2px solid var(--border);
+  display: flex; z-index: 99;
+}
+.tab-btn {
+  flex: 1; padding: 0 4px;
+  font-family: var(--ff-disp); font-size: 11px; letter-spacing: .06em;
+  color: var(--muted); border: none; background: none; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: color var(--trans), border-color var(--trans);
+  text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.tab-btn:hover { color: var(--accent); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.t-badge {
+  background: var(--accent); color: #fff; border-radius: 10px;
+  font-size: 10px; padding: 1px 5px; font-family: var(--ff-body); font-weight: 600;
+}
+
+/* ══════════════════════════════════════════
+   CHAPTER PICKER DROPDOWN
+══════════════════════════════════════════ */
+#ch-picker {
+  position: fixed; top: calc(var(--topbar-h) + var(--tabbar-h)); left: 0; right: 0;
+  background: var(--card); border-bottom: 2px solid var(--border);
+  z-index: 98; padding: 12px 16px; display: none; box-shadow: var(--shadow);
+}
+#ch-picker.open { display: block; }
+#ch-picker-grid { display: flex; flex-wrap: wrap; gap: 6px; max-width: 640px; margin: 0 auto; }
+.ch-pick-btn {
+  width: 40px; height: 34px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg); font-family: var(--ff-body); font-size: 14px; color: var(--text);
+  cursor: pointer; transition: background var(--trans), color var(--trans), border-color var(--trans);
+}
+.ch-pick-btn:hover, .ch-pick-btn.active {
+  background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600;
+}
+
+/* ══════════════════════════════════════════
+   MAIN CONTENT AREA
+══════════════════════════════════════════ */
+#main {
+  position: fixed;
+  top: calc(var(--topbar-h) + var(--tabbar-h));
+  left: 0; right: 0;
+  bottom: var(--botbar-h);
+  overflow: hidden;
+}
+.tab-panel { display: none; height: 100%; flex-direction: column; overflow: hidden; }
+.tab-panel.active { display: flex; }
+
+/* ══════════════════════════════════════════
+   BOTTOM BAR
+══════════════════════════════════════════ */
+#botbar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: var(--botbar-h);
+  background: var(--card); border-top: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 14px; gap: 10px; z-index: 100;
+  box-shadow: 0 -2px 10px rgba(44,36,22,.06);
+}
+#progress-wrap { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+#progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width .35s; }
+.bb-btn {
+  padding: 7px 13px; border-radius: 20px; border: 1.5px solid var(--accent);
+  background: var(--bg); color: var(--accent); font-family: var(--ff-body);
+  font-size: 14px; cursor: pointer; transition: background var(--trans), color var(--trans);
+  display: flex; align-items: center; gap: 5px; white-space: nowrap; flex-shrink: 0;
+}
+.bb-btn:hover { background: var(--accent); color: #fff; }
+.bb-btn.secondary { border-color: var(--border); color: var(--muted); }
+.bb-btn.secondary:hover { background: var(--bg2); color: var(--text); }
+.bb-btn .badge {
+  background: var(--accent); color: #fff; border-radius: 10px;
+  font-size: 11px; padding: 1px 6px; font-weight: 600; transition: background var(--trans);
+}
+.bb-btn:hover .badge { background: rgba(255,255,255,.3); }
+
+/* ══════════════════════════════════════════
+   TAB 1: READER
+══════════════════════════════════════════ */
+#reader-viewport { flex: 1; overflow: hidden; }
+#chapters-track {
+  display: flex; height: 100%;
+  transition: transform .38s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+.chapter-page {
+  min-width: 100vw; width: 100vw; height: 100%;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 20px 0 16px;
+}
+.chapter-page::-webkit-scrollbar { width: 5px; }
+.chapter-page::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.chapter-inner { max-width: 680px; margin: 0 auto; padding: 0 18px; }
+.ch-heading {
+  font-family: var(--ff-disp); font-size: 20px; color: var(--accent);
+  letter-spacing: .07em; margin-bottom: 6px; padding-left: 46px;
+}
+.ch-divider {
+  width: 56px; height: 2px; margin: 0 0 20px 46px;
+  background: linear-gradient(90deg, var(--accent2), transparent); border-radius: 1px;
+}
+.verse-row {
+  display: flex; align-items: flex-start; margin-bottom: 9px;
+  border-radius: 7px; transition: background .17s; cursor: pointer;
+  padding: 3px 5px 3px 0; border: 1.5px solid transparent;
+}
+.verse-mark-zone {
+  flex: 0 0 44px; display: flex; align-items: flex-start;
+  justify-content: center; padding-top: 3px; min-height: 26px;
+}
+.verse-num {
+  font-family: var(--ff-disp); font-size: 10px; color: var(--muted);
+  letter-spacing: .06em; line-height: 2; user-select: none;
+  transition: color var(--trans);
+}
+.mark-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  border: 1.5px solid var(--border); background: transparent;
+  margin-top: 7px; flex-shrink: 0;
+  transition: background var(--trans), border-color var(--trans);
+}
+.verse-text { flex: 1; font-size: 17px; line-height: 1.65; color: var(--text); padding-right: 4px; }
+.verse-row:hover .verse-num { color: var(--accent); }
+.verse-row.marked { background: var(--green-bg); border-color: var(--green-mid); }
+.verse-row.marked .verse-num { color: var(--green); }
+.verse-row.marked .mark-dot { background: var(--green-mid); border-color: var(--green-mid); }
+
+/* ══════════════════════════════════════════
+   TAB 2: MEINE STIMME
+══════════════════════════════════════════ */
+#vote-controls {
+  padding: 12px 18px 10px; background: var(--card);
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+#search-input {
+  flex: 1; min-width: 160px; padding: 7px 11px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); font-family: var(--ff-body); font-size: 16px; color: var(--text);
+  outline: none; transition: border-color var(--trans);
+}
+#search-input:focus { border-color: var(--accent); }
+#ch-filter {
+  padding: 7px 9px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); font-family: var(--ff-body); font-size: 15px; color: var(--text);
+  outline: none;
+}
+.sel-note { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.sel-note strong { color: var(--accent); }
+
+#vote-list { overflow-y: auto; flex: 1; padding: 6px 18px 18px; }
+#vote-list::-webkit-scrollbar { width: 5px; }
+#vote-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.ch-block-label {
+  font-family: var(--ff-disp); font-size: 11px; color: var(--accent); letter-spacing: .1em;
+  text-transform: uppercase; padding: 10px 4px 4px;
+  border-bottom: 1px solid var(--bg3); margin-bottom: 4px;
+}
+.vote-item {
+  display: flex; align-items: flex-start; gap: 9px; padding: 6px 8px;
+  border-radius: 7px; cursor: pointer; transition: background var(--trans);
+  margin-bottom: 2px; border: 1.5px solid transparent;
+}
+.vote-item:hover { background: var(--bg2); }
+.vote-item.selected { background: var(--green-bg); border-color: var(--green-mid); }
+.v-check {
+  width: 20px; height: 20px; border: 1.5px solid var(--border); border-radius: 5px;
+  flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center;
+  transition: background var(--trans), border-color var(--trans); font-size: 12px; color: #fff;
+}
+.vote-item.selected .v-check { background: var(--green-mid); border-color: var(--green-mid); }
+.v-ref { font-family: var(--ff-disp); font-size: 11px; color: var(--muted); white-space: nowrap; margin-top: 3px; min-width: 40px; }
+.vote-item.selected .v-ref { color: var(--green); }
+.v-text { font-size: 15px; line-height: 1.55; color: var(--text); }
+
+/* ══════════════════════════════════════════
+   TAB 3: AUSWERTUNG
+══════════════════════════════════════════ */
+#auswertung-layout { display: flex; flex: 1; overflow: hidden; }
+#code-panel {
+  width: 270px; flex-shrink: 0; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 16px;
+  overflow-y: auto; background: var(--card);
+}
+#code-panel::-webkit-scrollbar { width: 4px; }
+#code-panel::-webkit-scrollbar-thumb { background: var(--border); }
+#code-panel h3 { font-family: var(--ff-disp); font-size: 13px; color: var(--accent); letter-spacing: .07em; margin-bottom: 8px; }
+.import-hint {
+  font-size: 12px; color: var(--muted); line-height: 1.5; padding: 9px 10px;
+  background: var(--bg2); border-radius: 7px; border-left: 3px solid var(--accent2);
+  margin-bottom: 10px;
+}
+#code-paste {
+  width: 100%; height: 80px; padding: 8px; border: 1px solid var(--border); border-radius: 7px;
+  font-family: monospace; font-size: 11px; background: var(--bg); color: var(--text);
+  resize: none; outline: none;
+}
+#code-paste:focus { border-color: var(--accent); }
+.panel-divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+.p-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 9px; background: var(--bg2); border-radius: 7px; margin-bottom: 5px; font-size: 13px;
+}
+.p-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.p-name { flex: 1; font-size: 13px; }
+.p-cnt { font-size: 11px; color: var(--muted); }
+.p-del {
+  width: 20px; height: 20px; border: none; background: none; color: var(--muted);
+  cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
+  border-radius: 4px;
+}
+.p-del:hover { background: var(--bg3); color: #c0392b; }
+
+#matrix-panel { flex: 1; overflow: auto; padding: 16px; }
+#matrix-panel::-webkit-scrollbar { width: 5px; height: 5px; }
+#matrix-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+#matrix-empty { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 15px; font-style: italic; }
+.matrix-sort-row { display: flex; gap: 6px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+.sort-lbl { font-size: 12px; color: var(--muted); }
+.sort-btn {
+  padding: 4px 9px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg2); font-family: var(--ff-body); font-size: 12px;
+  cursor: pointer; color: var(--text); transition: background var(--trans);
+}
+.sort-btn.active, .sort-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+#min-votes-input {
+  width: 46px; padding: 3px 6px; border: 1px solid var(--border);
+  border-radius: 5px; font-size: 13px; background: var(--bg); text-align: center;
+}
+.matrix-wrap { overflow-x: auto; }
+table.doodle { border-collapse: collapse; font-size: 13px; width: 100%; }
+table.doodle .th-ref {
+  font-family: var(--ff-disp); font-size: 10px; color: var(--accent); letter-spacing: .06em;
+  padding: 8px 10px; border-bottom: 2px solid var(--border); white-space: nowrap; text-align: left;
+  position: sticky; top: 0; background: var(--card); z-index: 2; min-width: 80px;
+}
+table.doodle .th-name {
+  font-family: var(--ff-disp); font-size: 10px; letter-spacing: .05em;
+  padding: 8px 7px; border-bottom: 2px solid var(--border); text-align: center;
+  white-space: nowrap; position: sticky; top: 0; background: var(--card); z-index: 2; min-width: 54px;
+}
+table.doodle .th-sum {
+  font-family: var(--ff-disp); font-size: 10px; color: var(--green); letter-spacing: .06em;
+  padding: 8px 10px; border-bottom: 2px solid var(--border); text-align: center;
+  position: sticky; top: 0; background: var(--card); z-index: 2; min-width: 44px;
+}
+.tr-v td { border-bottom: 1px solid var(--bg3); }
+.tr-v:hover td { background: var(--bg2); }
+.td-ref { padding: 7px 10px; }
+.td-ref .ref { font-family: var(--ff-disp); font-size: 10px; color: var(--muted); }
+.td-ref .vt { font-size: 13px; color: var(--text); line-height: 1.3; max-width: 280px; }
+.td-dot { text-align: center; padding: 7px; font-size: 15px; }
+.dot-on { color: var(--green-mid); }
+.dot-off { color: var(--border); }
+.td-sum { text-align: center; padding: 7px 10px; font-family: var(--ff-disp); font-size: 13px; font-weight: 600; color: var(--green); }
+.cnt-bar { height: 3px; border-radius: 2px; background: var(--green-mid); margin-top: 2px; transition: width .3s; }
+.tr-all td { background: var(--green-bg) !important; }
+.tr-must td { outline: 2px solid var(--accent2); outline-offset: -1px; }
+
+/* must-have star button */
+.th-star {
+  font-family: var(--ff-disp); font-size: 10px; color: var(--accent);
+  padding: 8px 8px; border-bottom: 2px solid var(--border); text-align: center;
+  position: sticky; top: 0; background: var(--card); z-index: 2; min-width: 40px;
+}
+.td-star { text-align: center; padding: 6px 6px; }
+.btn-star {
+  width: 28px; height: 28px; border-radius: 7px; border: 1.5px solid var(--border);
+  background: transparent; cursor: pointer; font-size: 14px; line-height: 1;
+  transition: all var(--trans); color: var(--muted);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.btn-star:hover { border-color: var(--accent2); color: var(--accent2); background: var(--bg2); }
+.btn-star.starred { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+/* Finalauswahl section */
+#final-section {
+  margin-top: 18px; border-top: 2px solid var(--border);
+  padding-top: 14px;
+}
+#final-section.hidden { display: none; }
+#final-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; flex-wrap: wrap; gap: 8px;
+}
+#final-title {
+  font-family: var(--ff-disp); font-size: 13px; color: var(--accent);
+  letter-spacing: .06em; text-transform: uppercase;
+}
+#final-count {
+  font-family: var(--ff-disp); font-size: 12px; color: var(--muted);
+}
+#final-verse-list {
+  background: var(--bg2); border-radius: 8px; padding: 10px 12px;
+  margin-bottom: 12px; max-height: 180px; overflow-y: auto;
+  font-size: 13px; line-height: 1.6;
+}
+#final-verse-list::-webkit-scrollbar { width: 4px; }
+#final-verse-list::-webkit-scrollbar-thumb { background: var(--border); }
+.final-v-item {
+  padding: 3px 0; border-bottom: 1px solid var(--border);
+  display: flex; gap: 8px; align-items: baseline;
+}
+.final-v-item:last-child { border-bottom: none; }
+.final-v-ref {
+  font-family: var(--ff-disp); font-size: 10px; color: var(--accent2);
+  min-width: 52px; flex-shrink: 0;
+}
+#final-code-wrap { margin-top: 10px; }
+#final-code-box {
+  width: 100%; box-sizing: border-box;
+  padding: 9px 12px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 7px;
+  font-family: monospace; font-size: 11px; color: var(--text);
+  resize: none; height: 58px; margin-bottom: 8px;
+  word-break: break-all;
+}
+#final-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+#btn-gen-code {
+  padding: 8px 16px; border-radius: 7px; border: none;
+  background: var(--accent); color: #fff; font-family: var(--ff-body);
+  font-size: 14px; cursor: pointer; transition: opacity var(--trans);
+}
+#btn-gen-code:hover { opacity: .85; }
+#btn-copy-final {
+  padding: 8px 14px; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--bg2);
+  color: var(--text); font-family: var(--ff-body);
+  font-size: 14px; cursor: pointer; transition: background var(--trans);
+}
+#btn-copy-final:hover { background: var(--bg3); }
+#btn-clear-final {
+  padding: 8px 14px; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--bg2);
+  color: var(--muted); font-family: var(--ff-body);
+  font-size: 14px; cursor: pointer; transition: background var(--trans);
+  margin-left: auto;
+}
+#btn-clear-final:hover { background: #fae8e8; color: #c0392b; border-color: #e0aaaa; }
+
+/* ══════════════════════════════════════════
+   TAB 4: KONSENS & EXPORT
+══════════════════════════════════════════ */
+#export-panel { overflow-y: auto; flex: 1; padding: 20px; }
+#export-panel::-webkit-scrollbar { width: 5px; }
+#export-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.exp-card {
+  background: var(--card); border-radius: 11px; border: 1px solid var(--border);
+  padding: 20px; margin-bottom: 16px;
+}
+.exp-card h3 { font-family: var(--ff-disp); font-size: 14px; color: var(--accent); margin-bottom: 5px; }
+.exp-card p { font-size: 14px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+.thresh-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 14px; }
+.thresh-row input[type=range] { flex: 1; accent-color: var(--accent); }
+.thresh-row strong { color: var(--accent); min-width: 22px; text-align: center; }
+#consensus-list {
+  max-height: 240px; overflow-y: auto; padding: 10px;
+  background: var(--bg2); border-radius: 7px; font-size: 14px; line-height: 1.6;
+}
+#consensus-list::-webkit-scrollbar { width: 4px; }
+#consensus-list::-webkit-scrollbar-thumb { background: var(--border); }
+.prev-item { padding: 3px 0; border-bottom: 1px solid var(--border); }
+.prev-item:last-child { border-bottom: none; }
+.prev-ref { font-family: var(--ff-disp); font-size: 10px; color: var(--green); margin-right: 6px; }
+.exp-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.btn {
+  padding: 9px 16px; border-radius: 8px; border: none;
+  font-family: var(--ff-body); font-size: 15px; cursor: pointer;
+  transition: opacity var(--trans), transform .1s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { opacity: .88; }
+.btn-outline { background: var(--bg2); color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--bg3); }
+.btn-sm { padding: 6px 11px; font-size: 13px; }
+
+.block-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: 7px; margin-top: 10px; }
+.block-card {
+  padding: 10px; border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--bg); text-align: center; cursor: pointer;
+  transition: border-color var(--trans), background var(--trans);
+}
+.block-card:hover { background: var(--bg2); }
+.block-card.block-active { border-color: var(--accent); background: #fff8eb; }
+.block-num { font-family: var(--ff-disp); font-size: 10px; color: var(--accent); letter-spacing: .08em; }
+.block-name { font-size: 12px; color: var(--text); margin-top: 2px; line-height: 1.3; }
+
+/* ══════════════════════════════════════════
+   TAB 5: LESEPLAN
+══════════════════════════════════════════ */
+#today-banner {
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #fff8eb 0%, var(--green-bg) 100%);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex-shrink: 0;
+}
+#today-banner.inactive { background: var(--bg2); }
+.today-label { font-family: var(--ff-disp); font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+.today-chapter { font-family: var(--ff-disp); font-size: 16px; color: var(--accent); }
+.today-hint { font-size: 13px; color: var(--muted); font-style: italic; flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+#jump-today-btn {
+  padding: 6px 13px; border-radius: 7px; border: none;
+  background: var(--accent); color: #fff; font-family: var(--ff-body);
+  font-size: 14px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: opacity var(--trans);
+}
+#jump-today-btn:hover { opacity: .85; }
+
+#plan-list-wrap { overflow-y: auto; flex: 1; padding: 8px 18px 20px; }
+#plan-list-wrap::-webkit-scrollbar { width: 5px; }
+#plan-list-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.plan-week-block { margin-bottom: 6px; }
+.plan-week-heading {
+  font-family: var(--ff-disp); font-size: 11px; color: var(--accent);
+  letter-spacing: .1em; text-transform: uppercase;
+  padding: 12px 4px 5px; border-bottom: 1px solid var(--bg3); margin-bottom: 4px;
+  display: flex; justify-content: space-between; align-items: baseline;
+}
+.plan-week-subtitle { font-family: var(--ff-body); font-size: 12px; color: var(--muted); letter-spacing: 0; text-transform: none; font-style: italic; }
+
+.plan-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 8px; border-radius: 7px; margin-bottom: 2px;
+  cursor: pointer; border: 1.5px solid transparent;
+  transition: background var(--trans);
+}
+.plan-row:hover { background: var(--bg2); }
+.plan-row.is-today  { background: var(--green-bg); border-color: var(--green-mid); }
+.plan-row.is-past   { opacity: .6; }
+.plan-row.is-done   { opacity: .5; }
+
+.plan-date {
+  font-family: var(--ff-disp); font-size: 11px; color: var(--muted);
+  min-width: 86px; line-height: 1.35;
+}
+.plan-date .wd { font-size: 10px; color: var(--border); }
+.plan-row.is-today .plan-date { color: var(--green); }
+
+.plan-chs {
+  font-family: var(--ff-disp); font-size: 13px; color: var(--accent);
+  min-width: 80px; white-space: nowrap;
+}
+.plan-row.is-today .plan-chs { color: var(--green); font-weight: 600; }
+
+.plan-note { font-size: 13px; color: var(--muted); flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.plan-row.is-today .plan-note { color: var(--text); }
+
+.today-tag {
+  font-family: var(--ff-disp); font-size: 9px; letter-spacing: .07em;
+  background: var(--green-mid); color: #fff; padding: 2px 6px; border-radius: 4px;
+  text-transform: uppercase; flex-shrink: 0;
+}
+
+.plan-check {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  border: 1.5px solid var(--border); background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; cursor: pointer; color: transparent;
+  transition: all var(--trans);
+}
+.plan-check:hover { border-color: var(--green-mid); color: var(--green-mid); }
+.plan-check.checked { background: var(--green-mid); border-color: var(--green-mid); color: #fff; }
+
+.plan-progress {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 8px 4px; font-size: 13px; color: var(--muted);
+}
+.plan-progress-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.plan-progress-fill { height: 100%; background: linear-gradient(90deg, var(--green-mid), var(--accent2)); border-radius: 2px; transition: width .4s; }
+
+/* reader chip */
+#reader-today-chip {
+  display: none; align-items: center; gap: 8px;
+  padding: 7px 18px; background: var(--green-bg);
+  border-bottom: 1px solid var(--green-mid);
+  font-size: 13px; flex-shrink: 0; cursor: pointer;
+}
+#reader-today-chip.visible { display: flex; }
+#reader-today-chip strong { font-family: var(--ff-disp); color: var(--green); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+#reader-today-chip span { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+#reader-today-chip .chip-jump { font-size: 12px; color: var(--green); flex-shrink: 0; }
+
+/* ══════════════════════════════════════════
+   MODALS
+══════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(44,36,22,.45);
+  backdrop-filter: blur(3px); z-index: 200;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--card); border-radius: 14px; padding: 26px;
+  max-width: 500px; width: 100%;
+  box-shadow: 0 8px 40px rgba(44,36,22,.2);
+  animation: popIn .25s cubic-bezier(.4,0,.2,1);
+}
+@keyframes popIn { from { opacity:0;transform:scale(.94) } to { opacity:1;transform:scale(1) } }
+.modal-box h3 { font-family: var(--ff-disp); color: var(--accent); font-size: 16px; margin-bottom: 7px; }
+.modal-box p { font-size: 14px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+.modal-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+textarea.code-ta {
+  width: 100%; height: 78px; padding: 9px; border: 1px solid var(--border); border-radius: 7px;
+  font-family: monospace; font-size: 11px; background: var(--bg2); color: var(--text);
+  resize: none; outline: none; word-break: break-all;
+}
+
+/* Name modal */
+#name-overlay {
+  position: fixed; inset: 0; background: rgba(44,36,22,.55);
+  backdrop-filter: blur(4px); z-index: 300;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+#name-box {
+  background: var(--card); border-radius: 16px; padding: 30px;
+  max-width: 400px; width: 100%; box-shadow: 0 8px 48px rgba(44,36,22,.25);
+  text-align: center; animation: popIn .3s cubic-bezier(.4,0,.2,1);
+}
+#name-box .orn { font-size: 26px; margin-bottom: 8px; }
+#name-box h2 { font-family: var(--ff-disp); color: var(--accent); font-size: 19px; margin-bottom: 5px; }
+#name-box .sub { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+#name-input {
+  width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+  font-family: var(--ff-body); font-size: 18px; color: var(--text);
+  outline: none; transition: border-color var(--trans); text-align: center; background: var(--bg);
+}
+#name-input:focus { border-color: var(--accent); }
+
+/* Marked panel (reader) */
+#marked-panel {
+  position: fixed; inset: 0; z-index: 200;
+  display: none; align-items: flex-end;
+}
+#marked-panel.open { display: flex; }
+#marked-backdrop { position: absolute; inset: 0; background: rgba(44,36,22,.35); backdrop-filter: blur(2px); }
+#marked-sheet {
+  position: relative; z-index: 1; background: var(--card); border-radius: 18px 18px 0 0;
+  width: 100%; max-height: 80vh; display: flex; flex-direction: column;
+  box-shadow: 0 -4px 32px rgba(44,36,22,.18); animation: slideUp .3s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideUp { from { transform:translateY(60px);opacity:0 } to { transform:translateY(0);opacity:1 } }
+#marked-sheet-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 12px; border-bottom: 1px solid var(--border);
+}
+#marked-sheet-title { font-family: var(--ff-disp); font-size: 15px; color: var(--accent); letter-spacing: .06em; }
+#close-marked-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--bg2); color: var(--muted); font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+#close-marked-btn:hover { background: var(--border); }
+#marked-list { overflow-y: auto; flex: 1; padding: 12px 20px; }
+#marked-list::-webkit-scrollbar { width: 4px; }
+#marked-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.m-item { display: flex; gap: 10px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.m-item:last-child { border-bottom: none; margin-bottom: 0; }
+.m-ref { font-family: var(--ff-disp); font-size: 11px; color: var(--green); white-space: nowrap; padding-top: 2px; min-width: 54px; }
+.m-text { font-size: 15px; line-height: 1.5; color: var(--text); }
+#marked-sheet-footer { padding: 11px 20px 18px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+.sheet-btn {
+  flex: 1; padding: 10px; border-radius: 9px; border: none;
+  font-family: var(--ff-body); font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.sheet-btn.primary { background: var(--accent); color: #fff; }
+.sheet-btn.primary:hover { opacity: .88; }
+.sheet-btn.sec { background: var(--bg2); color: var(--text); border: 1px solid var(--border); }
+.sheet-btn.sec:hover { background: var(--bg3); }
+
+/* ══════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════ */
+#toast {
+  position: fixed; bottom: 68px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--text); color: #fff;
+  padding: 8px 18px; border-radius: 20px; font-size: 13px;
+  opacity: 0; transition: opacity .25s, transform .25s;
+  z-index: 400; pointer-events: none; white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* scrollbar global */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ NAME MODAL ══════════ -->
+<div id="name-overlay">
+  <div id="name-box">
+    <div class="orn">✦</div>
+    <h2>Die Sprüche</h2>
+    <p class="sub">Elberfelder 1905 · Lesen &amp; Abstimmen<br>Trinitatiszeit 2026</p>
+    <input type="text" id="name-input" placeholder="Dein Name" autocomplete="off" maxlength="30">
+    <button class="btn btn-primary" id="name-confirm-btn" style="width:100%;margin-top:12px;justify-content:center;">Weiter →</button>
+  </div>
+</div>
+
+<!-- ══════════ TOP BAR ══════════ -->
+<div id="topbar">
+  <div class="logo">Die Sprüche <small>Elberfelder 1905</small></div>
+
+  <div id="ch-nav">
+    <button class="nav-btn" id="prev-btn">&#8592;</button>
+    <div id="ch-indicator">Kapitel 1</div>
+    <button class="nav-btn" id="next-btn">&#8594;</button>
+  </div>
+
+  <div id="user-pill">👤 <strong id="user-label">–</strong></div>
+  <button id="reset-btn" title="Gespeicherten Stand löschen" style="border:none;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 6px;border-radius:6px;flex-shrink:0;" onclick="if(confirm('Gespeicherten Stand komplett löschen?')){localStorage.removeItem('sprueche_state_v1');location.reload();}">⟳</button>
+</div>
+
+<!-- ══════════ TAB BAR ══════════ -->
+<div id="tabbar">
+  <button class="tab-btn active" data-tab="reader">📖 Lesen</button>
+  <button class="tab-btn" data-tab="vote">✓ Meine Wahl <span class="t-badge" id="my-badge">0</span></button>
+  <button class="tab-btn" data-tab="auswertung">⊞ Auswertung <span class="t-badge" id="grp-badge">0</span></button>
+  <button class="tab-btn" data-tab="export">📄 Konsens</button>
+  <button class="tab-btn" data-tab="plan">📅 Plan</button>
+</div>
+
+<!-- ══════════ CHAPTER PICKER ══════════ -->
+<div id="ch-picker"><div id="ch-picker-grid"></div></div>
+
+<!-- ══════════ MAIN CONTENT ══════════ -->
+<div id="main">
+
+  <!-- TAB 1: READER -->
+  <div class="tab-panel active" id="panel-reader">
+    <div id="reader-today-chip">
+      <strong id="chip-label">HEUTE</strong>
+      <span id="chip-text"></span>
+      <span class="chip-jump">→ Plan</span>
+    </div>
+    <div id="reader-viewport">
+      <div id="chapters-track"></div>
+    </div>
+  </div>
+
+  <!-- TAB 2: MEINE STIMME -->
+  <div class="tab-panel" id="panel-vote">
+    <div id="vote-controls">
+      <input type="text" id="search-input" placeholder="🔍 Vers suchen …">
+      <select id="ch-filter"><option value="">Alle Kapitel</option></select>
+      <span class="sel-note">Gewählt: <strong id="sel-cnt">0</strong></span>
+      <button class="btn btn-outline btn-sm" id="clear-vote-btn">✕</button>
+    </div>
+    <div id="vote-list"></div>
+  </div>
+
+  <!-- TAB 3: AUSWERTUNG -->
+  <div class="tab-panel" id="panel-auswertung">
+    <div id="auswertung-layout">
+      <div id="code-panel">
+        <h3>Teilnehmer</h3>
+        <p class="import-hint">Code einer anderen Person hier einfügen. Jeder erzeugt seinen Code über „Meine Wahl".</p>
+        <textarea id="code-paste" placeholder="Code einfügen …"></textarea>
+        <button class="btn btn-primary btn-sm" id="add-code-btn" style="width:100%;margin-top:7px;justify-content:center;">+ Eintragen</button>
+        <hr class="panel-divider">
+        <div id="participant-list"><div style="color:var(--muted);font-size:12px;font-style:italic">Noch keine Teilnehmer.</div></div>
+      </div>
+      <div id="matrix-panel">
+        <div id="matrix-empty">Codes über das linke Panel hinzufügen.</div>
+        <div id="matrix-container" style="display:none">
+          <div class="matrix-sort-row">
+            <span class="sort-lbl">Sortierung:</span>
+            <button class="sort-btn active" data-sort="votes">Stimmen ↓</button>
+            <button class="sort-btn" data-sort="ref">Kapitel/Vers</button>
+            <span style="margin-left:auto;font-size:12px;color:var(--muted)">Mind.</span>
+            <input type="number" id="min-votes-input" value="1" min="1" max="20">
+            <span style="font-size:12px;color:var(--muted)">Stimmen</span>
+          </div>
+          <div class="matrix-wrap"><table class="doodle" id="doodle-table"></table></div>
+
+          <!-- Finalauswahl -->
+          <div id="final-section" class="hidden">
+            <div id="final-header">
+              <span id="final-title">★ Finalauswahl</span>
+              <span id="final-count">0 Verse ausgewählt</span>
+            </div>
+            <div id="final-verse-list"><em style="color:var(--muted)">Noch keine Verse markiert.</em></div>
+            <div id="final-actions">
+              <button id="btn-gen-code">🔑 Code generieren</button>
+              <button id="btn-copy-final" style="display:none">📋 Kopieren</button>
+              <button id="btn-clear-final">✕ Auswahl löschen</button>
+            </div>
+            <div id="final-code-wrap" style="display:none">
+              <textarea id="final-code-box" readonly></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 4: EXPORT -->
+  <div class="tab-panel" id="panel-export">
+    <div id="export-panel">
+      <div class="exp-card">
+        <h3>Konsens-Verse</h3>
+        <p>Verse, die mindestens <strong id="thresh-lbl">2</strong> Teilnehmer gewählt haben:</p>
+        <div class="thresh-row">
+          <span>Min. Stimmen:</span>
+          <input type="range" id="exp-thresh" min="1" max="10" value="2">
+          <strong id="thresh-num">2</strong>
+        </div>
+        <div id="consensus-list"><em style="color:var(--muted)">Noch keine Auswertungsdaten vorhanden.</em></div>
+        <div class="exp-actions">
+          <button class="btn btn-primary" id="export-docx-btn">📄 Als DOCX exportieren</button>
+          <button class="btn btn-outline" id="export-copy-btn">📋 Kopieren</button>
+        </div>
+      </div>
+      <div class="exp-card">
+        <h3>Thematische Blöcke – Trinitatiszeit</h3>
+        <p>Sieben Themenblöcke für den Lernplan von Trinitatis bis Ewigkeitssonntag.</p>
+        <div class="block-grid" id="block-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: LESEPLAN -->
+  <div class="tab-panel" id="panel-plan" style="flex-direction:column;">
+    <div id="today-banner" class="inactive">
+      <div>
+        <div class="today-label">Heute zu lesen</div>
+        <div class="today-chapter" id="today-ch-label">–</div>
+      </div>
+      <div class="today-hint" id="today-hint"></div>
+      <button id="jump-today-btn">→ Zum Kapitel</button>
+    </div>
+    <div id="plan-list-wrap">
+      <div id="plan-list"></div>
+    </div>
+  </div>
+
+</div><!-- end #main -->
+
+<!-- ══════════ BOTTOM BAR ══════════ -->
+<div id="botbar">
+  <!-- Reader controls -->
+  <div id="bb-reader" style="display:flex;flex:1;align-items:center;gap:10px;">
+    <button class="bb-btn secondary btn-sm" id="clear-marks-btn">✕ Löschen</button>
+    <div id="progress-wrap"><div id="progress-bar"></div></div>
+    <button class="bb-btn" id="show-marked-btn">Markiert <span class="badge" id="bb-badge">0</span></button>
+  </div>
+  <!-- Vote controls (hidden initially) -->
+  <div id="bb-vote" style="display:none;flex:1;align-items:center;gap:8px;">
+    <span style="font-size:13px;color:var(--muted);flex:1">Vers markieren = für Abstimmung wählen</span>
+    <button class="btn btn-outline btn-sm" id="import-code-btn">← Code laden</button>
+    <button class="btn btn-primary btn-sm" id="gen-code-btn">Code generieren →</button>
+  </div>
+  <!-- Auswertung / Export / Plan (hidden initially) -->
+  <div id="bb-other" style="display:none;flex:1;align-items:center;justify-content:center;">
+    <span style="font-size:13px;color:var(--muted);" id="bb-other-text">Codes links einfügen → Matrix erscheint automatisch</span>
+  </div>
+</div>
+
+<!-- ══════════ MARKED PANEL (Reader) ══════════ -->
+<div id="marked-panel">
+  <div id="marked-backdrop"></div>
+  <div id="marked-sheet">
+    <div id="marked-sheet-header">
+      <div id="marked-sheet-title">Markierte Verse</div>
+      <button id="close-marked-btn">✕</button>
+    </div>
+    <div id="marked-list"></div>
+    <div id="marked-sheet-footer">
+      <button class="sheet-btn primary" id="sheet-docx-btn">📄 DOCX</button>
+      <button class="sheet-btn sec" id="sheet-copy-btn">📋 Kopieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CODE MODAL ══════════ -->
+<div class="modal-overlay" id="code-modal">
+  <div class="modal-box">
+    <h3>Dein Stimmzettel-Code</h3>
+    <p>Diesen Code kopieren und an die auswertende Person senden – oder selbst in der Auswertungsansicht einfügen.</p>
+    <textarea class="code-ta" id="code-output" readonly></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="code-modal-close">Schließen</button>
+      <button class="btn btn-primary" id="code-modal-copy">📋 Code kopieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ TOAST ══════════ -->
+<div id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════
+   ELBERFELDER 1905 – SPRÜCHE (vollständig)
+════════════════════════════════════════════ */
+const CHAPTERS = [
+["Sprüche Salomos, des Sohnes Davids, des Königs von Israel,","zu erkennen Weisheit und Zucht, zu verstehen verständige Reden,","anzunehmen Zucht in Klugheit, Gerechtigkeit und Recht und Redlichkeit,","den Einfältigen Klugheit zu geben, dem Jüngling Erkenntnis und Besonnenheit –","es höre der Weise und mehre die Lehre, und der Verständige erwerbe Beratung –","um zu verstehen Spruch und Gleichnis, die Worte der Weisen und ihre Rätsel.","Die Furcht des HERRN ist der Anfang der Erkenntnis; Weisheit und Zucht verachten die Toren.","Höre, mein Sohn, die Zucht deines Vaters, und verwirf nicht die Weisung deiner Mutter;","denn sie sind ein lieblicher Kranz für dein Haupt und Ketten für deinen Hals.","Mein Sohn, wenn Sünder dich locken, so willige nicht ein!","Wenn sie sagen: Geh mit uns, wir wollen auf Blut lauern, wir wollen dem Unschuldigen auflauern;","wir wollen sie lebendig verschlingen wie das Totenreich, und ganz, wie die in die Grube fahren;","allerlei kostbares Gut werden wir finden, wir werden unsere Häuser mit Beute füllen;","dein Los wirf unter uns! Ein Beutel sei für uns alle –","mein Sohn, wandle nicht auf dem Weg mit ihnen, halte deinen Fuß zurück von ihrem Pfad!","Denn ihre Füße laufen zum Bösen, und sie eilen, Blut zu vergießen.","Denn umsonst wird das Netz ausgebreitet vor den Augen alles Geflügelten;","aber sie lauern ihrem eigenen Blut auf, sie stellen dem eigenen Leben nach.","So sind die Wege jedes Habgierigen: er rafft das Leben seines Besitzers dahin.","Die Weisheit ruft laut auf der Straße, auf den Plätzen erhebt sie ihre Stimme;","an der Spitze der lärmenden Orte ruft sie, an den Eingängen der Tore, in der Stadt spricht sie ihre Reden:","Wie lange, ihr Einfältigen, liebt ihr Einfalt, und haben Spötter Gefallen am Spotten, und hassen die Toren Erkenntnis?","Wendet euch zu meiner Zurechtweisung! Ich will meinen Geist über euch ausgießen, ich will meine Worte euch kundtun.","Weil ich gerufen habe und ihr euch geweigert habt, ich meine Hand ausgestreckt und niemand geachtet hat,","und ihr all meinen Rat verworfen und meine Zurechtweisung nicht gewollt habt –","so werde auch ich bei eurem Unglück lachen, ich werde spotten, wenn euer Schrecken kommt;","wenn euer Schrecken kommt wie ein Sturm, und euer Unglück heranzieht wie ein Wirbelwind, wenn Drangsal und Not über euch kommt:","dann werden sie mich rufen, aber ich werde nicht antworten; sie werden mich suchen, aber nicht finden.","Weil sie Erkenntnis gehaßt und die Furcht des HERRN nicht erwählt haben,","meinen Rat nicht gewollt und all meine Zurechtweisung verschmäht haben:","so sollen sie essen von der Frucht ihres Weges und sich sättigen von ihren eigenen Ratschlägen.","Denn die Abkehr der Einfältigen tötet sie, und die Sorglosigkeit der Toren bringt sie um.","Wer aber auf mich hört, der wird sicher wohnen und sorglos sein, ohne Furcht vor Unheil."],
+["Mein Sohn, wenn du meine Worte annimmst und meine Gebote bei dir aufbewahrst,","so daß du dein Ohr der Weisheit zuwendest, dein Herz dem Verstand zuneigest,","ja, wenn du nach Einsicht rufst, nach Verstand deine Stimme erhebst,","wenn du nach ihr suchst wie nach Silber und sie aufspürst wie verborgene Schätze,","dann wirst du die Furcht des HERRN verstehen und die Erkenntnis Gottes finden.","Denn der HERR gibt Weisheit; aus seinem Mund kommt Erkenntnis und Einsicht.","Er bewahrt den Aufrichtigen Heil auf, ein Schild ist er denen, die in Lauterkeit wandeln,","indem er die Pfade des Rechts behütet und den Weg seiner Frommen bewacht.","Dann wirst du Gerechtigkeit und Recht verstehen und Redlichkeit, jede gute Bahn.","Denn Weisheit wird in dein Herz eingehen und Erkenntnis deiner Seele lieblich sein;","Besonnenheit wird über dich wachen, Verstand wird dich bewahren,","um dich zu erretten vom bösen Weg, vom Mann, der verkehrte Reden redet,","von denen, die die Pfade der Geradheit verlassen, um auf den Wegen der Finsternis zu wandeln,","die Freude haben an Bösem und frohlocken über die Verkehrtheit des Bösen,","deren Pfade krumm sind und die auf ihren Wegen falsch handeln;","um dich zu erretten von der fremden Frau, von der Auswärtigen, die ihre Reden glatt macht,","die den Gefährten ihrer Jugend verläßt und den Bund ihres Gottes vergißt;","denn ihr Haus sinkt zum Tod hinab, und ihre Pfade führen zu den Schatten;","alle, die zu ihr eingehen, kehren nicht zurück und erreichen die Pfade des Lebens nicht.","So wirst du auf dem guten Weg wandeln und die Pfade der Gerechten einhalten.","Denn die Aufrechten werden das Land bewohnen und die Untadeligen darin bleiben;","aber die Gesetzlosen werden aus dem Land ausgerottet, und die Treulosen werden daraus ausgerafft."],
+["Mein Sohn, vergiß meine Weisung nicht, und dein Herz behalte meine Gebote;","denn Länge der Tage und Jahre des Lebens und Frieden werden sie dir mehren.","Güte und Treue sollen dich nicht verlassen; binde sie an deinen Hals, schreib sie auf die Tafel deines Herzens,","so wirst du Gunst und guten Verstand finden in den Augen Gottes und der Menschen.","Vertraue auf den HERRN von ganzem Herzen und stütze dich nicht auf deinen Verstand;","auf allen deinen Wegen erkenne ihn, so wird er deine Pfade gerade machen.","Sei nicht weise in deinen eigenen Augen; fürchte den HERRN und meide das Böse.","Das wird Gesundheit für deinen Nabel sein und Labsal für deine Gebeine.","Ehre den HERRN mit deinem Gut und mit den Erstlingen all deines Ertrages;","so werden deine Scheunen mit Fülle erfüllt werden, und deine Keltern werden von Most überfließen.","Mein Sohn, verwirf die Zucht des HERRN nicht und verabscheue seinen Tadel nicht;","denn den der HERR liebt, den züchtigt er, wie ein Vater den Sohn, an dem er Gefallen hat.","Wohl dem Menschen, der Weisheit gefunden, und dem Menschen, der Einsicht erlangt hat!","Denn ihr Gewinn ist besser als der Gewinn von Silber, und ihr Ertrag als Gold.","Sie ist kostbarer als Rubinen, und all dein Begehren kann ihr nicht gleichkommen.","Langes Leben ist in ihrer Rechten, in ihrer Linken Reichtum und Ehre.","Ihre Wege sind Wege der Lieblichkeit, und alle ihre Pfade sind Friede.","Ein Lebensbaum ist sie denen, die sie ergreifen, und die sie festhalten, sind glücklich zu preisen.","Der HERR hat die Erde durch Weisheit gegründet, hat die Himmel durch Einsicht befestigt.","Durch seine Erkenntnis wurden die Tiefen aufgespalten, und die Wolken träufeln Tau.","Mein Sohn, laß sie nicht aus deinen Augen entweichen, bewahre Klugheit und Besonnenheit,","so werden sie Leben für deine Seele sein und Zier für deinen Hals.","Dann wirst du auf deinem Weg sicher gehen, und dein Fuß wird nicht straucheln.","Wenn du dich niederlegst, wirst du dich nicht fürchten; ja, du wirst dich hinlegen, und dein Schlaf wird süß sein.","Fürchte dich nicht vor plötzlichem Schrecken und vor dem Verderben der Gesetzlosen, wenn es kommt;","denn der HERR wird deine Zuversicht sein und wird deinen Fuß vor dem Fang bewahren.","Verweigere dem Bedürftigen nicht das Gute, wenn deine Hand es zu tun vermag.","Sage nicht zu deinem Nächsten: Geh hin und komm wieder, morgen will ich geben! – wenn du es bei dir hast.","Sinn nicht auf das Böse gegen deinen Nächsten, da er sorglos bei dir wohnt.","Zank nicht mit einem Menschen ohne Grund, wenn er dir nichts Böses getan hat.","Eifere nicht gegen den Gewalttätigen und wähle keinen seiner Wege;","denn ein Greuel ist dem HERRN der Verkehrte, aber mit den Aufrichtigen ist sein vertrauter Umgang.","Den Fluch des HERRN ist im Haus des Gesetzlosen, aber die Wohnung der Gerechten segnet er.","Er selbst spottet der Spötter, aber den Demütigen gibt er Gnade.","Die Weisen werden Ehre beerben, aber die Toren werden Schande davontragen."],
+["Höret, ihr Söhne, die Zucht eines Vaters, und gebet acht, um Einsicht zu erlernen!","Denn gute Lehre gebe ich euch; verlaßt meine Weisung nicht!","Denn auch ich war meinem Vater ein Sohn, zart und der Einzige vor meiner Mutter.","Und er lehrte mich und sprach zu mir: Dein Herz halte fest an meinen Worten, bewahre meine Gebote und lebe!","Erwirb Weisheit, erwirb Einsicht; vergiß nicht und weiche nicht von den Reden meines Mundes!","Verlaß sie nicht, und sie wird dich bewahren; liebe sie, und sie wird dich hüten.","Der Anfang der Weisheit ist: Erwirb Weisheit! Und bei allem, was du hast, erwirb Einsicht!","Stelle sie hoch, so wird sie dich erhöhen; sie wird dich zu Ehren bringen, wenn du sie umfassest.","Sie wird deinem Haupt einen lieblichen Kranz geben, eine herrliche Krone wird sie dir verleihen.","Höre, mein Sohn, und nimm meine Reden an, so werden dir die Lebensjahre viele sein.","Auf dem Weg der Weisheit unterweise ich dich, ich lasse dich auf geraden Pfaden gehen.","Wenn du gehst, wird dein Schritt nicht gehemmt; und wenn du läufst, wirst du nicht straucheln.","Halte fest an der Zucht, laß nicht ab; bewahre sie, denn sie ist dein Leben.","Auf den Weg des Gesetzlosen gehe nicht, und wandle nicht auf dem Pfad der Bösen.","Meide ihn, ziehe nicht auf ihm hin; weiche von ihm ab und geh fürbaß!","Denn sie schlafen nicht, wenn sie nicht Böses getan haben, und ihr Schlaf wird geraubt, wenn sie nicht zu Fall gebracht haben.","Denn sie essen Brot der Gesetzlosigkeit und trinken Wein der Gewalttaten.","Der Pfad der Gerechten ist wie das glänzende Licht, das aufleuchtet und zunimmt bis zum vollen Tag.","Der Weg der Gesetzlosen ist wie Dunkelheit; sie wissen nicht, worüber sie fallen.","Mein Sohn, merke auf meine Worte; neige dein Ohr meinen Reden zu;","laß sie nicht aus deinen Augen entweichen, bewahre sie im Innern deines Herzens.","Denn sie sind Leben für die, die sie finden, und Gesundheit für ihren ganzen Leib.","Mehr als alles andere Behütete bewache dein Herz; denn von ihm aus gehen die Ausgänge des Lebens.","Tu Falschheit des Mundes von dir, und Verkehrtheit der Lippen sei fern von dir.","Deine Augen sollen geradeaus blicken, und deine Augenlider sollen geradeswegs auf das vor dir sehen.","Ebne die Bahn deines Fußes, und alle deine Wege seien fest.","Weiche nicht nach rechts noch nach links; wende deinen Fuß vom Bösen ab."],
+["Mein Sohn, merke auf meine Weisheit, neige dein Ohr meiner Einsicht zu,","damit du Besonnenheit bewahrst und deine Lippen Erkenntnis bewahren.","Denn die Lippen der fremden Frau triefen von Honig, und glatter als Öl ist ihr Gaumen;","aber hernach ist sie bitter wie Wermut, scharf wie ein zweischneidiges Schwert.","Ihre Füße hinken zum Tod, ihre Schritte schwanken in den Scheol;","den Pfad des Lebens bedenkt sie nicht, ihre Gänge sind wankend ohne daß sie es weiß.","So höre nun auf mich, ihr Söhne, und weicht nicht von den Reden meines Mundes!","Laß deinen Weg fern von ihr sein, und nahe nicht dem Eingang ihres Hauses,","damit du nicht deine Würde andern gibst und deine Jahre dem Grausamen,","damit Fremde sich nicht sättigen mit deiner Kraft und deine Mühsal in des Fremden Haus kommt,","und du am Ende stöhnst, wenn dein Fleisch und dein Leib verzehrt sind,","und du sagst: Wie habe ich Zucht gehaßt und mein Herz Tadel verschmäht!","Ich habe nicht auf die Stimme meiner Lehrer gehört und meinen Ohren die nicht zugeneigt, die mich unterwiesen.","Fast geriet ich in alles Übel, inmitten der Gemeinde und der Versammlung.","Trinke Wasser aus deiner eigenen Zisterne und Fließendes aus deinem eigenen Brunnen.","Sollen deine Quellen nach außen ausströmen, Bäche von Wasser auf den Straßen?","Sie sollen dir allein gehören und nicht Fremden mit dir.","Deine Quelle sei gesegnet, und habe Freude an der Frau deiner Jugend,","einer lieblichen Hindin und einer holden Gemse! Ihre Brüste sollen dich zu jeder Zeit tränken; in ihrer Liebe sei stets berauscht!","Warum solltest du, mein Sohn, von der Auswärtigen berauscht sein und die Fremde umarmen?","Denn die Wege eines Mannes liegen offen vor den Augen des HERRN, und alle seine Pfade wägt er.","Den Gesetzlosen fangen seine eigenen Frevel, und in den Stricken seiner Sünde wird er ergriffen.","Er wird sterben ohne Zucht, und in der Menge seiner Torheit taumelt er."],
+["Mein Sohn, wenn du für deinen Nächsten gebürgt, wenn du für einen Fremden deine Hand geschlagen hast,","bist durch die Reden deines Mundes gefangen, bist durch die Reden deines Mundes ergriffen.","Tu dies nun, mein Sohn, und errette dich: geh, beuge dich und bestürme deinen Nächsten;","gib deinen Augen keinen Schlaf und deinen Augenlidern kein Schlummern!","Errette dich wie die Gazelle aus der Hand und wie der Vogel aus der Hand des Vogelstellers!","Geh zur Ameise, du Fauler, betrachte ihre Wege und werde weise!","Sie hat keinen Anführer, keinen Aufseher und keinen Herrscher,","und bereitet doch in dem Sommer ihre Speise, sammelt in der Ernte ihre Nahrung.","Wie lange wirst du liegend schlafen, du Fauler? Wann willst du aufstehen von deinem Schlaf?","Ein kleines Schlafen, ein kleines Schlummern, ein kleines Falten der Hände zum Ruhen,","und deine Armut kommt wie ein Läufer, und dein Mangel wie ein bewaffneter Mann.","Ein nichtsnutziger Mensch, ein böser Mann, wandelt mit Falschheit des Mundes,","blinzt mit seinen Augen, winkt mit seinen Füßen, weist mit seinen Fingern,","Verkehrtheit ist in seinem Herzen, er sinnt jederzeit auf das Böse, er sät Zank aus.","Darum kommt sein Verderben plötzlich; in einem Augenblick wird er zerbrochen, ohne Heilung.","Sechs Dinge haßt der HERR, und sieben sind ein Greuel seiner Seele:","hochmütige Augen, eine lügende Zunge und Hände, die unschuldiges Blut vergießen,","ein Herz, das arge Gedanken entwirft, Füße, die eilend zum Bösen laufen,","ein falscher Zeuge, der Lügen ausspricht, und wer Zank sät unter Brüdern.","Bewahre, mein Sohn, das Gebot deines Vaters und verwirf nicht die Weisung deiner Mutter;","binde sie beständig auf dein Herz, hänge sie an deinen Hals!","Wenn du gehst, wird sie dich leiten; wenn du schläfst, wird sie über dir wachen; und wenn du aufwachst, wird sie mit dir reden.","Denn das Gebot ist eine Leuchte, und die Weisung ein Licht, und Zurechtweisungen der Zucht sind der Weg des Lebens,","um dich zu bewahren vor der bösen Frau, vor der glatten Zunge der fremden Frau.","Begehre nicht ihre Schönheit in deinem Herzen, und laß sie dich nicht gefangennehmen mit ihren Wimpern!","Denn um eine Hure kommt man herab bis auf einen Laib Brot, und die Frau des Mannes stellt dem kostbaren Leben nach.","Kann jemand Feuer in seinen Busen nehmen, ohne daß seine Kleider verbrennen?","Oder kann jemand auf glühenden Kohlen gehen, ohne daß seine Füße versengt werden?","So ist der, welcher zur Frau seines Nächsten eingeht: jeder, der sie berührt, bleibt nicht ungestraft.","Man verachtet den Dieb nicht, wenn er stiehlt, um seine Seele zu sättigen, wenn er hungert;","und wenn er ertappt wird, erstattet er siebenfach, er gibt alles Gut seines Hauses.","Wer eine Frau begeht, dem fehlt der Verstand; wer es tut, der bringt sich selbst um.","Schlag und Schande findet er, und seine Schmach wird nicht ausgelöscht werden.","Denn die Eifersucht ist das Wüten eines Mannes, und er wird nicht schonen am Tag der Rache.","Er wird kein Ansehn haben für irgendein Sühngeld, und er wird sich nicht beruhigen, wenn du Geschenke vermehrst."],
+["Mein Sohn, bewahre meine Worte und verwahre meine Gebote bei dir.","Bewahre meine Gebote und lebe und meine Weisung wie den Augapfel deines Auges!","Binde sie an deine Finger, schreibe sie auf die Tafel deines Herzens!","Sage der Weisheit: Du bist meine Schwester! und nenne die Einsicht deine Verwandte,","damit sie dich bewahre vor der fremden Frau, vor der Auswärtigen, die ihre Reden glatt macht.","Denn am Fenster meines Hauses blickte ich aus durch mein Gitter","und sah unter den Einfältigen, gewahrte unter den Söhnen einen verstandlosen Jüngling,","vorübergehend auf der Straße an ihrer Ecke und den Weg zu ihrem Haus einherschreitend","bei der Dämmerung, am Abend des Tages, als Nacht eintrat und Dunkelheit.","Und siehe, eine Frau kommt ihm entgegen, im Aufzug einer Hure und verschlossenen Herzens;","sie ist laut und eigenwillig, ihre Füße weilen nicht in ihrem Haus;","bald ist sie auf den Straßen, bald auf den Plätzen, und bei jedem Winkel lauert sie auf.","Und sie ergreift ihn und küßt ihn, macht ihr Angesicht schamlos und spricht zu ihm:","Friedmähler hatte ich zu bringen, heute habe ich meine Gelübde erfüllt;","darum bin ich herausgekommen, dir entgegen, um dein Angesicht zu suchen, und ich habe dich gefunden.","Mit Prachtdecken habe ich mein Lager bezogen, bunten Decken aus ägyptischem Linnen;","ich habe mein Bett besprengt mit Myrrhe, Aloe und Zimt.","Komm, laß uns trunken werden von Liebkosungen bis an den Morgen, wir wollen uns erquicken an Liebe!","Denn der Mann ist nicht zu Haus, er ist einen fernen Weg gegangen;","einen Geldbeutel hat er mitgenommen; erst am Tag des Vollmondes kommt er nach Haus.","Sie überredete ihn mit viel Zureden, mit der Glätte ihrer Lippen riss sie ihn mit sich fort.","Er folgt ihr sogleich wie ein Rind das zur Schlachtung geht, und wie ein Tor zur Strafe der Fessel,","bis ein Pfeil seine Leber spaltet, wie der Vogel sich eilet in den Strick, ohne zu wissen, daß es gegen sein Leben geht.","So höre nun auf mich, ihr Söhne, und merket auf die Reden meines Mundes!","Dein Herz weiche nicht auf ihre Wege ab; verirre dich nicht auf ihren Pfaden!","Denn viele Erschlagene hat sie hingestreckt, und zahlreich sind alle ihre Getöteten.","Auf dem Weg zum Totenreich ist ihr Haus, hinabgehend in die Kammern des Todes."],
+["Ruft nicht die Weisheit, und erhebt nicht die Einsicht ihre Stimme?","Auf dem Gipfel der Höhen, am Weg, an den Kreuzwegen, steht sie;","neben den Toren vorn an der Stadt, beim Eingang der Türen, ruft sie laut:","Zu euch, ihr Männer, rufe ich, und meine Stimme geht an die Menschenkinder.","Ihr Einfältigen, lernt Klugheit, und ihr Toren, lernt Verstand!","Höret, denn treffliches will ich reden, und das Auftun meiner Lippen ist Redlichkeit.","Denn mein Gaumen redet Wahrheit, und ein Greuel meinen Lippen ist das Gottlose.","In Gerechtigkeit sind alle Reden meines Mundes; nichts ist darunter, was verdreht oder verkehrt wäre.","Sie alle sind klar dem Verständigen und recht denen, die Erkenntnis gefunden haben.","Nehmt meine Zucht an und nicht Silber und Erkenntnis lieber als ausgesuchtes Gold!","Denn Weisheit ist besser als Korallen, und all dein Begehren kann ihr nicht gleichkommen.","Ich, Weisheit, wohne bei der Klugheit und ich finde Erkenntnis bei verständigem Nachdenken.","Die Furcht des HERRN ist Haß des Bösen; Stolz und Hochmut und bösen Weg und verkehrten Mund hasse ich.","Mir gehören Rat und Klugheit, ich bin Einsicht, mir gehört Kraft.","Durch mich regieren Könige und sagen Fürsten Gerechtigkeit.","Durch mich herrschen Fürsten und Edle, alle Richter der Erde.","Ich liebe, die mich lieben, und die mich suchen, werden mich finden.","Reichtum und Ehre ist bei mir, dauerhafter Bestand und Gerechtigkeit.","Meine Frucht ist besser als Gold und als feines Gold, und mein Ertrag als ausgesuchtes Silber.","Auf dem Weg der Gerechtigkeit wandle ich, inmitten der Pfade des Rechts,","um die, die mich lieben, mit Gütern zu beschenken und ihre Schatzkammern zu füllen.","Der HERR hat mich als Anfang seines Weges erworben, als das Erste seiner Werke, von damals an.","Von Ewigkeit her bin ich eingesetzt, von Anfang an, vor den Uranfängen der Erde.","Als es noch keine Tiefen gab, war ich geboren; als es noch keine Quellen mit Wasser gab.","Bevor die Berge eingesenkt wurden, vor den Hügeln, wurde ich geboren,","noch ehe er die Erde und die Fluren gemacht hatte und das erste der Erdschollen.","Als er die Himmel bereitete, war ich da; als er den Kreis auf die Fläche der Tiefe einzeichnete,","als er die Wolken droben befestigte, als die Quellen der Tiefe mächtig wurden,","als er dem Meer seine Grenze setzte, damit die Wasser seinen Befehl nicht übertreten, als er die Grundfesten der Erde einzeichnete,","da war ich bei ihm als Werkmeister, und ich war seine Wonne Tag für Tag, jederzeit vor ihm spielend,","spielend auf dem Kreis seiner Erde, und meine Wonnen sind bei den Menschenkindern.","So höret nun auf mich, ihr Söhne! Glückselig die, welche meine Wege bewahren!","Höret auf Zucht und werdet weise, und gebt sie nicht auf!","Glückselig der Mensch, der auf mich hört, der Tag für Tag vor meinen Toren wacht, die Pfosten meiner Türen bewahrt!","Denn wer mich findet, hat Leben gefunden und erlangt Wohlgefallen vom HERRN.","Wer aber wider mich sündigt, tut seiner Seele Gewalt an; alle, die mich hassen, lieben den Tod."],
+["Die Weisheit hat ihr Haus gebaut, ihre sieben Säulen gehauen;","sie hat ihr Schlachtvieh geschlachtet, ihren Wein gemischt, ihren Tisch bereitet;","sie hat ihre Mägde ausgesandt, sie ruft auf dem Gipfel der Höhen der Stadt:","Wer einfältig ist, der kehre hier ein! Dem an Verstand Mangelnden sagt sie:","Kommt, esset von meiner Speise und trinket von dem Wein, den ich gemischt habe!","Verlaßt die Einfalt und lebt und geht auf dem Weg der Einsicht!","Wer den Spötter züchtigt, der bringt Schande über sich; wer den Gesetzlosen tadelt, zieht sich Schandfleck zu.","Züchtige den Weisen, und er wird dich lieben.","Gib dem Weisen, und er wird noch weiser werden; unterrichte den Gerechten, und er wird an Lehre zunehmen.","Der Anfang der Weisheit ist die Furcht des HERRN, und den Heiligen erkennen ist Einsicht.","Denn durch mich werden deine Tage viele sein, und Jahre des Lebens werden dir gemehrt werden.","Wenn du weise bist, bist du weise für dich selbst; und wenn du spottest, trägst du es allein.","Die törichte Frau ist laut; sie ist einfältig und weiß nichts.","Und sie sitzt am Eingang ihres Hauses auf einem Sitz auf den Höhen der Stadt,","um die Vorübergehenden zu rufen, die ihren Weg gerade gehen:","Wer einfältig ist, der kehre hier ein! Und dem an Verstand Mangelnden sagt sie:","Gestohlene Wasser sind süß und heimliches Brot ist köstlich!","Aber er weiß nicht, daß die Totengeister dort sind, daß ihre Geladenen in den Tiefen des Totenreichs sind."],
+["Sprüche Salomos. Ein weiser Sohn macht dem Vater Freude, aber ein törichter Sohn ist seiner Mutter Kummer.","Schätze der Gesetzlosigkeit nützen nicht, aber Gerechtigkeit errettet vom Tod.","Der HERR läßt die Seele des Gerechten nicht hungern, aber die Begierde der Gesetzlosen stößt er weg.","Eine schlaffe Hand macht arm, aber die Hand der Fleißigen macht reich.","Wer im Sommer sammelt, ist ein kluger Sohn, wer in der Ernte schläft, ist ein schandvoller Sohn.","Segen ist auf dem Haupt des Gerechten, aber Gewalttat bedeckt den Mund der Gesetzlosen.","Das Andenken des Gerechten ist zum Segen, aber der Name der Gesetzlosen vermodert.","Wer weisen Herzens ist, nimmt Gebote an; aber wer törichten Mundes ist, kommt zu Fall.","Wer in Lauterkeit wandelt, wandelt sicher, wer aber krumme Wege geht, der wird erkannt.","Wer mit dem Auge blinzelt, schafft Kummer; und wer törichten Mundes ist, kommt zu Fall.","Der Mund des Gerechten ist ein Quell des Lebens, aber der Mund der Gesetzlosen bedeckt Gewalttat.","Haß erregt Streit, aber Liebe deckt alle Übertretungen zu.","In den Lippen des Verständigen findet sich Weisheit, aber die Rute kommt über den Rücken des Verständnislosen.","Weise hören auf Weisheit, aber der Mund der Toren sprudelt Torheit.","Der Reichtum des Reichen ist seine feste Stadt, der Schrecken der Armen ihre Armut.","Der Lohn des Gerechten ist Leben, der Ertrag des Gesetzlosen ist Sünde.","Wer auf Zucht hört, ist auf dem Weg des Lebens, aber wer Tadel verwirft, geht in die Irre.","Wer Haß verbirgt, hat lügende Lippen, und wer Verleumdung trägt, ist ein Tor.","Bei vielen Worten fehlt Übertretung nicht, aber wer seine Lippen zurückhält, ist klug.","Die Zunge des Gerechten ist ausgesuchtes Silber; das Herz der Gesetzlosen ist wenig wert.","Die Lippen des Gerechten weiden viele, aber die Toren sterben durch Mangel an Verstand.","Der Segen des HERRN macht reich, und eigene Mühe fügt nichts hinzu.","Dem Toren ist Verworfenheit wie ein Spaß, aber dem Mann der Einsicht ist Weisheit Freude.","Was der Gesetzlose fürchtet, trifft ihn, und was die Gerechten begehren, wird gegeben.","Wie der Sturm dahinfährt, so ist der Gesetzlose nicht mehr; aber der Gerechte ist ein ewiger Bestand.","Wie Essig für die Zähne und wie Rauch für die Augen, so ist der Träge für die, die ihn ausschicken.","Die Furcht des HERRN verlängert die Tage, aber die Jahre der Gesetzlosen werden verkürzt.","Die Hoffnung der Gerechten ist Wonne, aber die Erwartung der Gesetzlosen vergeht.","Die Zuflucht des HERRN ist die Stärke des Aufrichtigen, aber ein Schrecken für die Übeltäter.","Der Gerechte wird nimmermehr wanken, aber die Gesetzlosen werden das Land nicht bewohnen.","Der Mund des Gerechten sprudelt Weisheit, aber die verkehrte Zunge wird abgeschnitten.","Die Lippen des Gerechten wissen, was wohlgefällt, aber der Mund der Gesetzlosen das Verkehrte."],
+["Falsche Waage ist dem HERRN ein Greuel, aber ein volles Gewicht ist sein Wohlgefallen.","Wenn Hochmut kommt, kommt Schande, aber bei den Demütigen ist Weisheit.","Die Rechtschaffenheit der Aufrichtigen leitet sie, aber die Falschheit der Treulosen vernichtet sie.","Reichtum hilft nicht am Tag des Zornes, aber Gerechtigkeit errettet vom Tod.","Die Gerechtigkeit des Tadellosen ebnet seinen Weg, aber der Gesetzlose fällt durch seine Gesetzlosigkeit.","Die Gerechtigkeit der Aufrichtigen errettet sie, aber in ihrer Begierde werden die Treulosen gefangen.","Wenn ein Gesetzloser stirbt, geht die Hoffnung dahin, und die Erwartung der Tücke vergeht.","Der Gerechte wird aus der Bedrängnis errettet, und der Gesetzlose kommt an seine Stelle.","Mit dem Mund bringt der Heuchlerische seinen Nächsten ins Verderben, aber durch Erkenntnis werden die Gerechten gerettet.","Wenn es dem Gerechten gut geht, frohlockt die Stadt, und wenn die Gesetzlosen umkommen, ist Jubel.","Durch den Segen der Aufrichtigen wird die Stadt erhöht, aber durch den Mund der Gesetzlosen wird sie niedergerissen.","Wer seinen Nächsten verachtet, hat keinen Verstand, aber ein verständiger Mann schweigt.","Der Verleumder geht umher und deckt auf, was verborgen ist, aber der zuverlässige Sinn wahrt das Geheimnis.","Wo kein kluger Rat ist, kommt ein Volk zu Fall; aber durch die Menge der Ratgeber gibt es Sicherheit.","Wer für einen Fremden einsteht, leidet, aber wer Handschlag haßt, ist sicher.","Eine anmutige Frau erwirbt Ehre, und gewalttätige Männer erwerben Reichtum.","Der Gütige tut sich selbst Gutes, aber der Grausame schadet seinem eigenen Fleisch.","Der Gesetzlose verdient trügerischen Lohn, aber wer Gerechtigkeit sät, einen wahren.","So ist der, welcher Gerechtigkeit übt: zum Leben; und wer Böses nachläuft: zu seinem Tod.","Die Verkehrten des Herzens sind dem HERRN ein Greuel, aber die Tadellosen auf ihrem Weg sind sein Wohlgefallen.","Mein Wort dafür: der Böse wird nicht ungestraft bleiben; der Same der Gerechten aber wird gerettet.","Wie ein goldener Ring in der Nüstern eines Schweines ist eine schöne Frau ohne Verstand.","Das Begehren der Gerechten ist nichts als Gutes, die Hoffnung der Gesetzlosen ist Grimm.","Einer gibt freigebig und wird immer reicher, ein anderer hält zurück über das Rechte hinaus und wird immer ärmer.","Wer reichlich spendet, wird gemästet, und wer reichlich tränkt, wird selbst getränkt.","Wer Getreide zurückhält, den verflucht das Volk; aber Segen ist auf dem Haupt dessen, der es verkauft.","Wer nach dem Guten sucht, strebt nach Wohlgefallen; wer aber das Böse sucht, dem kommt es.","Wer auf seinen Reichtum vertraut, der wird fallen; aber die Gerechten werden grünen wie ein Blatt.","Wer sein Haus ins Unglück stürzt, erbt den Wind, und der Tor wird Knecht des Herzenweisen.","Die Frucht des Gerechten ist ein Lebensbaum, und der Weise gewinnt Seelen.","Wenn schon der Gerechte auf der Erde vergolten wird, um wieviel mehr der Gesetzlose und der Sünder!"],
+["Wer Zucht liebt, liebt Erkenntnis; aber wer Tadel haßt, ist ein Vieh.","Der Gute erlangt Wohlgefallen vom HERRN, aber den Mann der bösen Anschläge verdammt er.","Der Mensch wird durch Gesetzlosigkeit nicht befestigt; aber die Wurzel der Gerechten wird nicht wanken.","Eine treffliche Frau ist die Krone ihres Mannes; aber eine, die Schande bereitet, ist wie Fäulnis in seinen Knochen.","Die Gedanken der Gerechten sind Recht, die Beratungen der Gesetzlosen sind Trug.","Die Worte der Gesetzlosen sind ein Auflauern auf Blut, aber der Mund der Aufrechten errettet sie.","Die Gesetzlosen werden umgekehrt, so daß sie nicht mehr sind; aber das Haus der Gerechten steht.","Ein Mann wird nach dem Maß seiner Klugheit gelobt, aber wer verkehrt ist, wird verachtet.","Wer gering gilt und einen Knecht hat, ist besser als wer sich ehrt und Brot mangelt.","Der Gerechte achtet auf das Leben seines Tieres, aber die Eingeweide der Gesetzlosen sind grausam.","Wer sein Land anbaut, wird mit Brot gesättigt, aber wer nichtigen Dingen nachjagt, ist ein Verständnisloser.","Der Gesetzlose begehrt die Beute der Bösen, aber die Wurzel der Gerechten bringt Frucht.","Im Frevel der Lippen liegt eine böse Schlinge; aber der Gerechte entkommt der Bedrängnis.","Aus der Frucht seines Mundes wird ein Mann durch Gutes gesättigt, und das Werk der Hände des Menschen kommt zu ihm zurück.","Der Tor hat in seinen Augen seinen Weg für recht; aber wer auf Rat hört, ist weise.","Ein Tor zeigt seinen Ärger am selben Tag; aber ein Kluger verbirgt Schmähung.","Wer Wahrheit redet, sagt Recht; aber ein falscher Zeuge spricht Trug.","Wer mit dem Schwert unnötig sticht, es ist wie Geschwätz; aber die Zunge der Weisen bringt Heilung.","Wahrhaftige Lippen bestehen auf immer, aber die Lügenzunge nur für den Augenblick.","Im Herzen derer, die böse Pläne schmieden, ist Trug; aber für die, die Frieden raten, ist Freude.","Dem Gerechten widerfährt kein Schaden; aber die Gesetzlosen werden voll Böses.","Lügende Lippen sind dem HERRN ein Greuel; aber die treulich handeln, sind sein Wohlgefallen.","Ein kluger Mensch verbirgt Erkenntnis, aber das Herz der Toren schreit Torheit aus.","Die Hand der Fleißigen wird herrschen; aber die schlaffe wird zinspflichtig werden.","Sorge im Herzen des Menschen beugt ihn nieder; aber ein gutes Wort macht ihn fröhlich.","Der Gerechte verhält sich besser als sein Nächste; aber der Weg der Gesetzlosen verführt sie.","Der Faule jagt nicht seiner Beute nach; aber der Schatz des Fleißigen ist kostbar.","Auf dem Weg der Gerechtigkeit ist Leben, aber auf dem Pfad ihres Weges ist kein Tod."],
+["Ein weiser Sohn hört die Zucht des Vaters; aber der Spötter hört nicht auf Tadel.","Von der Frucht seines Mundes ißt ein Mann Gutes; aber die Seele der Treulosen genießt Gewalttat.","Wer seinen Mund bewacht, bewahrt sein Leben; wer aber seine Lippen auftut weit, dem geschieht Verderben.","Die Seele des Trägen begehrt, und doch ist nichts da; aber die Seele der Fleißigen wird erquickt.","Der Gerechte haßt Lügenrede, aber der Gesetzlose handelt schändlich und schämt sich nicht.","Gerechtigkeit behütet den, der auf geradem Weg geht; aber Gottlosigkeit stürzt den Sünder um.","Einer tut, als wäre er reich, doch hat er nichts; einer tut, als wäre er arm, doch hat er großen Reichtum.","Das Lösegeld für das Leben eines Mannes ist sein Reichtum, aber der Arme hört keine Drohung.","Das Licht der Gerechten ist freudig; aber die Leuchte der Gesetzlosen erlischt.","Durch Hochmut kommt nur Streit; bei denen aber, die Rat annehmen, ist Weisheit.","Reichtum durch Eitelkeit gewonnen, schwindet; aber wer durch die Hand sammelt, mehrt ihn.","Hinausgeschobene Hoffnung macht das Herz krank; aber ein erfülltes Verlangen ist ein Lebensbaum.","Wer das Gebot verachtet, muß dafür büßen; aber wer das Gebot fürchtet, wird belohnt.","Die Weisung des Weisen ist ein Quell des Lebens, um sich von den Schlingen des Todes zu wenden.","Guter Verstand gibt Gunst; aber der Weg der Treulosen ist beständig.","Jeder Kluge handelt mit Erkenntnis; aber der Tor breitet Torheit aus.","Ein böser Bote fällt ins Unglück; aber ein treuer Gesandter bringt Heilung.","Armut und Schande: wer Zucht von sich weist; aber wer auf Tadel hört, wird geehrt.","Ein erfülltes Verlangen ist süß für die Seele; aber ein Greuel ist es den Toren, das Böse zu meiden.","Wandle mit Weisen, so wirst du weise; aber der Umgang mit Toren wird Schaden bringen.","Das Böse verfolgt die Sünder; aber den Gerechten wird Gutes vergolten.","Der Gute läßt Kinder und Kindeskinder erben; aber der Besitz des Sünders wird für den Gerechten aufbewahrt.","Viel Nahrung ist auf dem Neubruch der Armen; aber mancher Mensch geht ohne Recht zugrunde.","Wer seine Rute spart, haßt seinen Sohn; aber wer ihn liebt, sucht ihn früh mit Zucht heim.","Der Gerechte ißt zur Sättigung seiner Seele; aber der Bauch der Gesetzlosen hat Mangel."],
+["Die weise Frau baut ihr Haus; aber die Torheit reißt es mit eigenen Händen nieder.","Wer in seiner Aufrichtigkeit wandelt, fürchtet den HERRN; aber wer in seinen Wegen verkehrt ist, verachtet ihn.","Im Mund des Toren ist der Stecken des Hochmuts; aber die Lippen der Weisen bewahren sie.","Wo keine Rinder sind, ist die Krippe leer; aber durch die Kraft des Rindes ist Ertrag in Menge.","Ein treuer Zeuge lügt nicht; aber ein falscher Zeuge haucht Lügen.","Der Spötter sucht Weisheit und findet sie nicht; aber dem Verständigen ist Erkenntnis leicht.","Geh weg von dem unverständigen Mann, denn du erkennst keine Lippen der Erkenntnis.","Die Weisheit des Klugen ist, seinen Weg zu verstehen; aber die Torheit der Toren ist Betrug.","Toren spotten sich selbst wegen der Schuld; aber unter den Aufrechten ist Wohlgefallen.","Das Herz kennt seine Bitternis, und in seine Freude mischt sich kein Fremder.","Das Haus der Gesetzlosen wird niedergerissen; aber das Zelt der Aufrechten steht.","Es ist ein Weg, der einem Menschen gerade erscheint; aber sein Ende ist der Weg zum Tod.","Auch im Lachen hat das Herz Schmerz, und das Ende der Freude ist Kummer.","Der Abtrünnige des Herzens wird durch seine Wege satt; aber der gute Mann durch seinen.","Der Einfältige glaubt jedem Wort; aber der Kluge achtet auf seinen Schritt.","Der Weise fürchtet und wendet sich ab vom Bösen; aber der Tor ist dreist und sicher.","Wer aufbrausend ist, handelt töricht; und der Mann der bösen Pläne ist verhaßt.","Die Einfältigen erbten Torheit; aber die Klugen werden mit Erkenntnis gekrönt.","Die Bösen knien vor den Guten; und die Gesetzlosen vor den Toren des Gerechten.","Dem Armen ist der Nächste fremd; aber die Liebenden des Reichen sind viele.","Wer den Geringen verachtet, sündigt; aber wer des Armen sich erbarmt, ist glücklich zu preisen.","Irren nicht die, welche Böses ersinnen? Aber Güte und Treue sind bei denen, die Gutes ersinnen.","Bei aller Mühe ist Überschuß; aber Lippengeschwätz führt nur zur Armut.","Die Krone der Weisen ist ihr Reichtum; aber die Torheit der Toren ist Torheit.","Ein wahrer Zeuge errettet Seelen; aber wer Lügen haucht, täuscht.","In der Furcht des HERRN ist starke Zuversicht, und seinen Kindern wird er eine Zuflucht sein.","Die Furcht des HERRN ist ein Quell des Lebens, zu entgehen den Schlingen des Todes.","In der Menge des Volkes ist die Würde des Königs; aber in der Geringheit des Volkes liegt der Fürsten Untergang.","Langer Atem ist großer Verstand; aber wer ungeduldig ist, treibt die Torheit heraus.","Ein ruhiges Herz ist das Leben des Fleisches; aber Neid ist Fäulnis der Gebeine.","Wer den Armen unterdrückt, lästert seinen Schöpfer; aber wer sich des Bedürftigen erbarmt, ehrt ihn.","Durch seine Bosheit wird der Gesetzlose niedergestreckt; aber der Gerechte findet Zuflucht auch in seinem Tod.","Weisheit ruht im Herzen des Verständigen; aber was im Innern der Toren ist, das wird bekannt.","Gerechtigkeit erhöht ein Volk; aber die Sünde ist der Völker Schmach.","Des Königs Wohlgefallen ist beim verständigen Knecht; aber sein Zorn trifft den schändlichen."],
+["Eine sanfte Antwort wendet den Zorn ab; aber das verletzende Wort erregt Grimm.","Die Zunge der Weisen macht Erkenntnis lieblich; aber der Mund der Toren sprudelt Torheit.","Die Augen des HERRN sind überall, sie beschauen Böse und Gute.","Die heilende Zunge ist ein Lebensbaum; aber was Verkehrtes in ihr ist, zermalmt den Geist.","Ein Tor verachtet die Zucht seines Vaters; aber wer auf Tadel hört, wird klug.","Im Haus des Gerechten ist reicher Schatz; aber im Ertrag des Gesetzlosen ist Wirrnis.","Die Lippen der Weisen streuen Erkenntnis aus; aber das Herz der Toren ist nicht so.","Das Schlachtopfer der Gesetzlosen ist dem HERRN ein Greuel; aber das Gebet der Aufrechten ist sein Wohlgefallen.","Ein Greuel dem HERRN ist der Weg des Gesetzlosen; aber wer nach Gerechtigkeit strebt, liebt er.","Harte Züchtigung ist für den, der den Weg verläßt; wer Tadel haßt, stirbt.","Das Totenreich und der Abgrund liegen offen vor dem HERRN; um wieviel mehr die Herzen der Menschenkinder!","Der Spötter liebt es nicht, daß man ihn tadelt; zu den Weisen geht er nicht.","Ein fröhliches Herz macht das Angesicht freundlich; aber durch Kummer des Herzens wird der Geist gebrochen.","Das Herz des Verständigen sucht Erkenntnis; aber der Mund der Toren weidet Torheit.","Alle Tage des Armen sind böse; aber ein fröhliches Herz hat beständig ein Fest.","Besser ein wenig mit Furcht des HERRN als großer Schatz mit Unruhe dabei.","Besser ein Gericht Gemüse mit Liebe als ein gemästeter Stier mit Haß dabei.","Ein zorniger Mann regt Streit an; aber wer langmütig ist, stillt den Hader.","Der Weg des Trägen ist wie eine Dornenhecke; aber der Pfad der Aufrechten ist gebahnt.","Ein weiser Sohn erfreut den Vater; aber ein törichter Mensch verachtet seine Mutter.","Torheit ist Freude dem Verständnislosen; aber ein verständiger Mann geht geradeaus.","Pläne scheitern, wo kein Beraten ist; aber bei der Menge der Ratgeber kommen sie zustande.","Eine Freude für den Menschen ist die Antwort seines Mundes; und wie gut ist ein Wort zur rechten Zeit!","Der Pfad des Lebens geht aufwärts für den Verständigen, um zu wenden vom Totenreich unten.","Das Haus der Hochmütigen reißt der HERR nieder; aber er stellt die Grenze der Witwe fest.","Böse Pläne sind dem HERRN ein Greuel; aber reine Reden sind lieblich.","Wer nach Gewinn giert, stört sein Haus; aber wer Gaben haßt, lebt.","Das Herz des Gerechten sinnt, um zu antworten; aber der Mund der Gesetzlosen sprudelt Böses.","Fern ist der HERR von den Gesetzlosen; aber das Gebet der Gerechten hört er.","Was die Augen erfreut, erfreut das Herz; und die gute Botschaft macht die Gebeine fett.","Ein Ohr, das lebendige Zurechtweisung hört, weilt unter den Weisen.","Wer Zucht verwirft, verachtet seine Seele; aber wer auf Tadel hört, erwirbt Verstand.","Furcht des HERRN ist Zucht zur Weisheit; und vor Ehre kommt Demut."],
+["Des Menschen ist das Planen des Herzens; aber vom HERRN kommt die Antwort der Zunge.","Alle Wege eines Mannes sind rein in seinen Augen; aber der HERR wägt die Geister.","Befiehl dem HERRN deine Werke, so werden deine Pläne gelingen.","Alles hat der HERR zu seinem Zweck gemacht, und auch den Gesetzlosen für den Tag des Bösen.","Jeder Hochmütige ist dem HERRN ein Greuel; mein Wort dafür, er bleibt nicht ungestraft.","Durch Güte und Treue wird Schuld gesühnt, und durch die Furcht des HERRN meidet man das Böse.","Wenn die Wege des Menschen dem HERRN wohlgefallen, dann bringt er auch seine Feinde zur Versöhnung mit ihm.","Besser ist wenig mit Gerechtigkeit als viele Einkünfte ohne Recht.","Das Herz des Menschen erwägt seinen Weg; aber der HERR lenkt seinen Schritt.","Wahrsagung ist auf den Lippen des Königs; sein Mund darf beim Gericht nicht fehlen.","Waage und Waagschalen des Rechts gehören dem HERRN; alle Gewichte des Beutels sind sein Werk.","Ein Greuel ist es den Königen, Unrecht zu tun; denn durch Gerechtigkeit wird der Thron befestigt.","Wohlgefallen des Königs sind Lippen der Wahrheit; und wer recht redet, den liebt er.","Der Zorn des Königs ist Boten des Todes; aber ein weiser Mann besänftigt ihn.","Im Licht des Angesichts des Königs ist Leben, und sein Wohlgefallen ist wie eine Wolke des Spätregens.","Weisheit zu erwerben ist so viel besser als Gold, und Einsicht zu erwerben ist vorzuziehen dem Silber.","Die Bahn der Aufrechten ist das Meiden des Bösen; wer seinen Weg bewacht, bewahrt seine Seele.","Vor dem Zerbrechen kommt Hochmut, und vor dem Sturz Überheblichkeit des Geistes.","Besser demütigen Geistes mit den Geringen sein als Beute teilen mit den Stolzen.","Wer auf Gott Acht gibt, der findet Gutes; und glückselig, wer auf den HERRN vertraut.","Der Weise des Herzens wird verständig geheißen, und die Süßigkeit der Lippen mehrt die Belehrung.","Ein Quell des Lebens ist Verstand für seinen Besitzer; aber die Zucht der Toren ist Torheit.","Das Herz des Weisen unterrichtet seinen Mund und mehrt die Gelehrigkeit auf seinen Lippen.","Liebliche Worte sind eine Honigspeise, süß der Seele und heilsam den Gebeinen.","Es ist ein Weg, der einem gerade erscheint; aber am Ende davon sind die Wege des Todes.","Der Hunger des Arbeiters treibt für ihn; denn sein Mund dringt auf ihn.","Ein nichtswürdiger Mann gräbt Böses aus; und auf seinen Lippen ist wie sengendes Feuer.","Ein verkehrter Mann streut Streit aus, und ein Zuflüsterer trennt Vertraute.","Ein Mann des Gewaltdranges verführt seinen Nächsten und führt ihn auf einen Weg, der nicht gut ist.","Wer seine Augen zukneift, sinnt auf Verdrehtes; wer seine Lippen zusammenbeißt, hat das Böse vollbracht.","Eine Krone der Ehre ist graues Haar; auf dem Weg der Gerechtigkeit wird sie gefunden.","Besser der Langmütige als ein Held, und wer seinen Geist beherrscht, als wer eine Stadt einnimmt.","In den Busen wird das Los geworfen; aber sein ganzes Gericht ist vom HERRN."],
+["Besser ein trockenes Stück Brot mit Frieden als ein Haus voll Schlachtopfer mit Streit.","Ein kluger Knecht herrscht über einen schandbaren Sohn und teilt das Erbe inmitten der Brüder.","Der Tiegel ist für das Silber und der Schmelzofen für das Gold; aber der HERR prüft die Herzen.","Der Böse horcht auf lügnerische Lippen; der Lügner leiht dem verderblichen Wort sein Ohr.","Wer den Armen verspottet, verhöhnt seinen Schöpfer; wer sich über Unglück freut, wird nicht ungestraft bleiben.","Die Krone der Alten sind Kindeskinder, und der Ruhm der Kinder sind ihre Väter.","Treffliche Rede ziemt dem Gottlosen nicht; erst recht nicht dem Edlen lügenhafte Lippen.","Bestechung ist ein Zauberstein in den Augen seines Herrn; überallhin wendet er sich ihm zu Glück.","Wer eine Übertretung zudeckt, sucht Liebe; wer sie aber immer wieder vorwirft, der trennt Vertraute.","Eine Zurechtweisung dringt tiefer in den Verständigen als hundert Schläge in den Toren.","Ein Aufrührer sucht nur das Böse; aber ein grausamer Bote wird gegen ihn gesandt werden.","Besser einem Bären zu begegnen, dem die Jungen geraubt sind, als einem Toren in seiner Torheit.","Wer Böses mit Gutem vergilt, von dessen Haus wird das Böse nicht weichen.","Einen Streit beginnen ist, eine Wasserflut zu öffnen; ehe er zum Prozeß wird, laß den Hader fahren.","Wer den Schuldigen freispricht und wer den Gerechten verdammt, sie beide sind dem HERRN ein Greuel.","Warum ist Kaufgeld in der Hand des Toren? Weisheit zu erwerben, da er doch keinen Sinn hat.","Ein Freund liebt zu jeder Zeit, und als Bruder wird er in der Bedrängnis erkannt.","Ein Mensch von keinem Verstand schlägt Hände zusammen, er verpfändet sich für seinen Nächsten.","Wer Streit liebt, liebt die Übertretung; wer sein Tor hoch macht, sucht Zerstörung.","Wer krummen Herzens ist, findet kein Gutes; und wer verkehrt mit seiner Zunge ist, fällt ins Böse.","Wer einen Toren zeugt, dem geschieht es zur Trauer; und der Vater eines Toren hat keine Freude.","Ein fröhliches Herz ist eine gute Arznei; aber ein gebrochener Geist vertrocknet die Gebeine.","Der Gesetzlose nimmt ein Bestechungsgeschenk aus dem Busen, um die Pfade des Rechts zu verbiegen.","Weisheit und Einsicht sind dem Verständigen zugewandt; aber die Augen des Toren schweifen bis ans Ende der Erde.","Ein törichter Sohn ist dem Vater ein Kummer und Bitterkeit der, die ihn gebar.","Auch den Gerechten zu bestrafen ist nicht gut; noch Edle zu schlagen wegen ihrer Rechtschaffenheit.","Wer seine Worte schont, hat Erkenntnis; und wer ruhigen Geistes ist, ist ein verständiger Mann.","Auch ein Tor, der schweigt, wird für weise gehalten; wer seine Lippen verschließt, für verständig."],
+["Wer sich absondert, sucht seinen eigenen Willen; bei allem wahren Vorteil greift er ein.","Ein Tor hat keinen Gefallen an Einsicht, sondern nur daran, daß sein Herz sich enthüllt.","Wenn der Gesetzlose kommt, kommt auch Verachtung, und mit der Schande kommt Schmach.","Die Worte des Mundes eines Mannes sind tiefe Wasser; ein sprudelnder Bach ist die Quelle der Weisheit.","Es ist nicht gut, die Person des Gesetzlosen zu bevorzugen, so daß man das Recht des Gerechten beugt.","Die Lippen des Toren gehen in Streit; sein Mund ruft nach Schlägen.","Der Mund des Toren ist sein Verderben, und seine Lippen sind eine Schlinge für seine Seele.","Die Worte des Zuflüsterers sind wie Leckerbissen, und sie dringen hinab in die Kammern des Leibes.","Auch der in seinen Werken Nachlässige ist ein Bruder des Verderbers.","Der Name des HERRN ist ein starker Turm; der Gerechte läuft darin und ist in Sicherheit.","Das Gut des Reichen ist seine feste Stadt und wie eine hohe Mauer – in seiner Einbildung.","Vor dem Zusammenbruch ist das Herz des Menschen hochmütig, und vor der Ehre kommt Demut.","Wer antwortet, bevor er gehört hat: Torheit und Schande ist das für ihn.","Der Geist eines Mannes erträgt seine Krankheit; aber einen niedergeschlagenen Geist, wer trägt den?","Das Herz des Verständigen erwirbt Erkenntnis; und das Ohr der Weisen sucht Erkenntnis.","Das Geschenk eines Mannes macht Raum für ihn und führt ihn vor die Großen.","Der erste in seinem Rechtsstreit erscheint gerecht; doch kommt sein Nächste und untersucht ihn.","Das Los beendet die Streitigkeiten und entscheidet zwischen Mächtigen.","Ein gebrochener Bruder ist abweisender als eine feste Stadt, und Streitigkeiten sind wie der Riegel eines Palastes.","Aus der Frucht des Mundes eines Mannes wird sein Bauch gesättigt; aus dem Ertrag seiner Lippen wird er satt.","Tod und Leben stehen in der Macht der Zunge; und wer sie liebt, wird ihre Frucht essen.","Wer eine Frau gefunden hat, hat Gutes gefunden und erlangt Wohlgefallen vom HERRN.","Ein Armer redete bittend; ein Reicher antwortete hart.","Der Mann von vielen Freunden kommt auf einen Bruder, und es gibt einen Freund, der enger verbunden ist als ein Bruder."],
+["Besser ein Armer, der in seiner Lauterkeit wandelt, als ein mit seinen Lippen Verkehrter und ein Tor.","Auch ohne Erkenntnis ist Verlangen nicht gut; und wer mit den Füßen eilt, sündigt.","Die Torheit des Menschen verdreht seinen Weg; und sein Herz zürnt wider den HERRN.","Reichtum macht viele Freunde; aber der Arme wird von seinem Nächsten getrennt.","Ein falscher Zeuge bleibt nicht ungestraft; und wer Lügen haucht, entkommt nicht.","Viele flehen das Angesicht des Edlen an; und jeder ist Freund dem, der Gaben gibt.","Alle Brüder des Armen hassen ihn; erst recht entfernen sich seine Freunde weit von ihm.","Wer Verstand erwirbt, liebt seine Seele; wer Einsicht bewahrt, findet Gutes.","Ein falscher Zeuge bleibt nicht ungestraft, und wer Lügen haucht, geht zugrunde.","Üppigkeit ziemt dem Toren nicht; erst recht nicht, daß ein Knecht über Fürsten herrscht.","Verstand des Menschen hält seinen Zorn zurück; und seine Herrlichkeit ist es, Übertretung zu übergehen.","Das Zürnen des Königs ist wie das Brüllen eines Löwen; aber sein Wohlgefallen ist wie Tau auf dem Grase.","Ein törichter Sohn ist das Verderben seines Vaters; und das Zanken der Frau ist ein beständiges Tröpfeln.","Haus und Gut ist das Erbe von den Vätern; aber von dem HERRN ist eine verständige Frau.","Faulheit läßt in Schlaf sinken; und die träge Seele wird hungern.","Wer das Gebot hält, bewahrt seine Seele; wer seine Wege verachtet, stirbt.","Wer dem Armen leiht, leiht dem HERRN; und er wird ihm seine Wohltat vergelten.","Züchtige deinen Sohn, denn es gibt Hoffnung; und laß deine Seele sich nicht zur Tat reizen, um ihn zu töten.","Der Mensch des großen Zornes trägt die Strafe; und wenn du ihn befreitest, mußt du es nochmals tun.","Höre Rat und nimm Zucht an, damit du in der Folge weise seist.","Viele Pläne sind im Herzen des Menschen; aber der Rat des HERRN, der besteht.","Der Wunsch des Menschen ist seine Güte; und besser ist ein Armer als ein Lügner.","Die Furcht des HERRN gereicht zum Leben; satt bleibt man davon und muß des Bösen nicht besucht werden.","Der Faule vergräbt seine Hand in der Schüssel; zum Mund bringt er sie nicht wieder.","Schlägst du den Spötter, so wird der Einfältige klug; und tadelt man den Verständigen, so wird er Erkenntnis nehmen.","Wer seinen Vater mißhandelt und seine Mutter verjagt, ist ein Sohn, der Schmach und Schande bereitet.","Höre auf, mein Sohn, auf Belehrung und hör nicht mehr auf Worte der Verführung.","Ein nichtswürdiger Zeuge spottet des Rechts, und der Mund der Gesetzlosen verschlingt Unrecht.","Gerichte sind für die Spötter bereitet; und Schläge für den Rücken der Toren."],
+["Der Wein macht spöttisch, und das starke Getränk macht lärmen; und jeder, der davon taumelt, ist nicht weise.","Das Drohen des Königs ist wie das Knurren eines Löwen; wer ihn erzürnt, sündigt wider sein eigenes Leben.","Für den Toren ist es eine Ehre, vom Streit abzustehen; aber jeder Tor greift an.","Im Herbst ackert der Faule nicht; er sucht im Sommer, und da ist nichts.","Der Rat im Herzen eines Mannes ist tiefes Wasser; aber ein verständiger Mann schöpft es herauf.","Die meisten Menschen preisen einen jeden seinen eigenen Freunden; aber einen treuen Mann, wer findet ihn?","Wer in Lauterkeit wandelt, ist der Gerechte; glückselig seine Kinder nach ihm.","Ein König, der auf dem Richterstuhl sitzt, zerstreut alles Böse mit seinen Augen.","Wer kann sagen: Ich habe mein Herz rein gehalten, ich bin rein von meiner Sünde?","Zweierlei Gewichte und zweierlei Maß sind dem HERRN beide ein Greuel.","An seinen Werken erkennt man auch den Knaben, ob sein Tun rein und recht sei.","Das Gehör des Ohres und das Sehen des Auges: der HERR hat sie beide gemacht.","Liebe den Schlaf nicht, damit du nicht arm werdest; schlage deine Augen auf, und du wirst Brot genug haben.","Es ist schlecht, es ist schlecht! spricht der Käufer; aber wenn er geht, rühmt er sich dann.","Es gibt Gold und eine Menge Korallen; aber das Kostbarste Gut sind Lippen der Erkenntnis.","Nimm sein Kleid, denn er hat für einen Fremden gebürgt; und um der Auswärtigen willen pfände ihn.","Brot der Lüge ist süß dem Menschen; aber hernach wird sein Mund mit Kies gefüllt.","Pläne werden durch Beratung gefestigt; und mit kluger Führung mache Krieg.","Wer umhergeht und verleumdet, deckt Geheimnisse auf; so halte dich nicht mit dem auf, der mit Lippen redet.","Wer seinen Vater und seine Mutter verflucht, dessen Leuchte erlischt in tiefster Dunkelheit.","Ein Erbgut, das am Anfang eifrig gesucht wird, wird am Ende kein Segen sein.","Sag nicht: Ich will Böses vergelten! Warte auf den HERRN, er wird dir helfen.","Zweierlei Gewichte sind dem HERRN ein Greuel; und eine falsche Waage ist nicht gut.","Die Schritte des Mannes werden vom HERRN befestigt; wie kann dann ein Mensch seinen Weg verstehen?","Es ist eine Schlinge für den Menschen, vorschnell Heiliges zu gelübden; und nach Gelübden nachzuforschen.","Ein weiser König worfelt die Gesetzlosen und läßt das Rad über sie gehen.","Der Geist des Menschen ist die Leuchte des HERRN, die alle Kammern des Leibes durchforscht.","Güte und Wahrheit bewahren den König; und durch Güte wird sein Thron erhalten.","Die Freude der Jungen Männer ist ihre Kraft; und die Herrlichkeit der Alten ihr graues Haar.","Striemen, die bluten, sind eine Wundarznei fürs Böse; so sind Schläge, die das Innere des Leibes treffen."],
+["Wie Wasserbäche ist das Herz des Königs in der Hand des HERRN; er neigt es, wohin er will.","Alle Wege des Mannes sind recht in seinen eigenen Augen; aber der HERR wägt die Herzen.","Gerechtigkeit und Recht zu üben ist dem HERRN mehr wert als Schlachtopfer.","Hochmütige Augen und stolzes Herz – die Leuchte der Gesetzlosen: Sünde.","Die Pläne des Fleißigen führen sicher zum Gewinn; aber jeder Eilige kommt in Mangel.","Einen Schatz zu erraffen mit lügender Zunge ist ein flüchtiger Hauch, ein Suchen des Todes.","Die Gewalttaten der Gesetzlosen reißen sie fort, weil sie das Recht zu tun verweigern.","Der Weg des Schuldigen ist höchst krumm; aber das Tun des Reinen ist gerade.","Besser auf einer Ecke des Daches wohnen als mit einem zänkischen Weib in gemeinsamer Wohnung.","Die Seele des Gesetzlosen begehrt das Böse; sein Nächster findet keine Gnade in seinen Augen.","Wenn der Spötter gestraft wird, wird der Einfältige weise; und wenn der Weise unterwiesen wird, nimmt er Erkenntnis an.","Der Gerechte schaut das Haus des Gesetzlosen; er stürzt die Gesetzlosen ins Verderben.","Wer sein Ohr zuschließt vor dem Schreien des Armen, wird auch selbst schreien und nicht erhört werden.","Ein heimliches Geschenk stillt den Zorn, und Bestechung im Busen stillt den heftigen Grimm.","Recht tun ist eine Freude für den Gerechten; aber ein Schrecken für die Täter des Bösen.","Ein Mensch, der vom Weg der Einsicht abirrt, wird in der Versammlung der Totengeister wohnen.","Wer Vergnügen liebt, wird arm werden; wer Wein und Öl liebt, wird nicht reich.","Der Gesetzlose wird Lösegeld für den Gerechten; und der Treuelose für die Aufrechten.","Besser in der Wüste wohnen als mit einem zänkischen und nörgeligen Weib.","Im Haus des Weisen ist kostbarer Schatz und Öl; aber ein törichter Mann verschwendet ihn.","Wer der Gerechtigkeit und Güte nachläuft, wird Leben finden, Gerechtigkeit und Ehre.","Ein Weiser stürmt die Stadt der Helden und bricht die Stärke nieder, auf die sie vertraut.","Wer seinen Mund und seine Zunge bewacht, bewahrt seine Seele vor Bedrängnis.","Ein Stolzer, Hochmütiger heißt Spötter; wer überheblich handelt, handelt in übertriebenem Hochmut.","Das Begehren des Faulen tötet ihn; denn seine Hände weigern sich zu arbeiten.","Den ganzen Tag begehrt er begierig; aber der Gerechte gibt und hält nicht zurück.","Das Schlachtopfer der Gesetzlosen ist ein Greuel; erst recht, wenn man es in schlechter Absicht bringt.","Ein falscher Zeuge geht zugrunde; aber ein Mann, der hört, wird beständig reden.","Ein gesetzloser Mann macht sein Angesicht hart; aber der Aufrechte, der befestigt seinen Weg.","Es gibt keine Weisheit und keine Einsicht und keinen Rat gegen den HERRN.","Das Pferd wird gerüstet für den Tag des Kampfes; aber die Rettung ist vom HERRN."],
+["Ein guter Name ist mehr zu wählen als großer Reichtum; Gunst ist besser als Silber und Gold.","Reicher und Armer begegnen sich; der HERR hat sie alle beide gemacht.","Der Kluge sieht das Böse und birgt sich; aber die Einfältigen gehen weiter und werden bestraft.","Demut und Furcht des HERRN haben Reichtum und Ehre und Leben im Gefolge.","Dornen und Schlingen sind auf dem Weg des Verkehrten; wer seine Seele bewahrt, bleibt fern von ihnen.","Gewöhne den Knaben an seinen Weg; er wird auch wenn er alt wird nicht davon weichen.","Der Reiche herrscht über die Armen, und der Borgende ist des Leihenden Knecht.","Wer Unrecht sät, der erntet Unheil; und der Stab seines Zornes hat ein Ende.","Wer ein gütiges Auge hat, wird gesegnet; denn er gibt dem Armen von seinem Brot.","Vertreibe den Spötter, so geht der Streit fort; und Hader und Schande hören auf.","Wer auf Lauterkeit des Herzens die Lippen liebt, dem ist der König Freund.","Die Augen des HERRN bewachen Erkenntnis; aber er vereitelt die Worte des Treulosen.","Der Faule sagt: Ein Löwe ist draußen; mitten auf dem Platz werde ich erschlagen.","Die Grube ist ein tiefer Schlund für den Mund der Fremden; auf wen der HERR zürnt, fällt hinein.","Torheit ist gebunden im Herzen des Knaben; die Rute der Zucht wird sie weit von ihm treiben.","Wer den Armen unterdrückt, um sich zu bereichern, und wer dem Reichen gibt, wird nur zur Armut kommen.","Neige dein Ohr und höre die Worte der Weisen und richte dein Herz auf meine Erkenntnis!","Denn es ist schön, wenn du sie in deinem Innern bewahrst, wenn sie allesamt auf deinen Lippen bereit stehen.","Damit dein Vertrauen auf den HERRN sei, unterweise ich dich heute, auch dich.","Habe ich nicht dreißig Reden geschrieben für dich, voll von Rat und Erkenntnis,","um dir die Wahrheit der zuverlässigen Worte kund zu tun, daß du zuverlässige Worte zurückbringst denen, die dich gesandt haben?","Raube nicht den Geringen, weil er gering ist; und unterdrücke den Elenden nicht im Tor;","denn der HERR wird ihre Sache führen und das Leben ihrer Ausrauber rauben.","Freunde dich nicht mit dem Zornigen an, gehe nicht mit dem Heißblütigen,","damit du nicht seine Wege erlernest und dir eine Schlinge für deine Seele holest.","Sei nicht unter denen, die Hände schlagen, unter denen, die für Schulden bürgen.","Wenn du nichts hast, womit du zahlst, warum soll dein Bett von unter dir weggenommen werden?","Verrücke nicht die alte Grenze, die deine Väter gesetzt haben.","Siehst du einen Mann in seinem Werk geschickt? Er wird vor Königen stehen, er wird nicht vor dunklen stehen."],
+["Wenn du dich setzt, um mit einem Herrn zu essen, so bedenke wohl, wer vor dir ist;","und lege ein Messer an deine Kehle, wenn du ein Mann des Appetits bist.","Gier nicht nach seinen Leckereien; denn es ist Trugbrot.","Mühe dich nicht, reich zu werden; von deiner eigenen Einsicht laß ab.","Läßt du deine Augen darauf fliegen, so ist es nicht mehr da; denn es macht sich Flügel und fliegt wie ein Adler zum Himmel.","Iß nicht das Brot des Mißgünstigen, und gier nicht nach seinen Leckereien;","denn wie er in seiner Seele gerechnet hat, so ist er: Iß und trink! spricht er zu dir; aber sein Herz ist nicht bei dir.","Den Bissen, den du gegessen hast, mußt du ausspucken, und du verlierst deine lieblichen Worte.","Rede nicht in den Ohren eines Toren; denn er mißachtet die Weisheit deiner Reden.","Verrücke nicht die alte Grenze, und gehe nicht auf die Äcker der Waisen;","denn ihr Rächer ist stark; er wird ihre Sache gegen dich führen.","Bringe dein Herz zur Zucht, und deine Ohren zu Worten der Erkenntnis.","Laß nicht ab, einen Knaben zu züchtigen; denn wenn du ihn mit der Rute schlägst, stirbt er nicht.","Du schlägst ihn mit der Rute, und seine Seele rettest du aus dem Totenreich.","Mein Sohn, wenn dein Herz weise ist, so wird auch mein Herz sich freuen.","Und meine Nieren werden frohlocken, wenn deine Lippen reden, was recht ist.","Dein Herz eifere nicht den Sündern nach; sei täglich in der Furcht des HERRN!","Denn gewiß, es gibt eine Zukunft, und deine Hoffnung wird nicht abgeschnitten.","Du, höre und sei weise, mein Sohn, und lenke dein Herz auf den Weg.","Sei nicht unter denen, die Wein trinken in Überfluß, unter denen, die sich von Fleisch vollstopfen;","denn Sauf-Fresser werden arm, und Schlaf bekleidet mit Fetzen.","Höre auf deinen Vater, der dich gezeugt hat, und verachte deine Mutter nicht, wenn sie alt ist.","Kaufe Wahrheit und verkaufe sie nicht; Weisheit und Zucht und Einsicht.","Der Vater des Gerechten frohlockt sehr; und wer einen Weisen zeugt, freut sich an ihm.","Es freue sich dein Vater und deine Mutter, und es jubele, wer dich gebar.","Mein Sohn, gib mir dein Herz, und deine Augen sollen meine Wege beobachten.","Denn eine Grube ist die Hure, und eine Schlucht die Auswärtige;","sie lauert dem Räuber auf und mehrt die Treulosen unter den Menschen.","Für wen gilt die Wehklage? Für wen die Beklemmung? Für wen der Streit? Für wen wunden ohne Ursache? Für wen trübe Augen?","Für die, die beim Wein verweilen, die hingehen, um Mischgetränk zu kosten.","Blicke nicht auf den Wein, wenn er sich rötet, wenn er seinen Glanz im Becher zeigt, wenn er glatt eingeht.","Am Ende beißt er wie eine Schlange und sticht wie eine Otter.","Deine Augen sehen Seltsames, und dein Herz redet Verkehrtes.","Und du wirst sein wie einer, der mitten im Meer schläft, und wie einer, der oben auf der Mastspitze schläft.","Sie haben mich geschlagen: kein Schmerz war mein! Man hat mich geprügelt: ich merkte es nicht! Wann werde ich aufwachen? Ich suche es noch einmal!"],
+["Eifere den bösen Menschen nicht nach und begehre nicht, bei ihnen zu sein;","denn ihr Herz sinnt auf Gewalttaten, und ihre Lippen reden von Mühsal.","Durch Weisheit wird das Haus gebaut; und durch Einsicht wird es befestigt;","und durch Erkenntnis werden die Gemächer gefüllt mit allerlei kostbarem und lieblichem Gut.","Ein weiser Mensch ist stark, und ein wissender Mann mehrt Kraft.","Denn mit kluger Führung führst du deinen Krieg, und die Rettung liegt in der Menge der Berater.","Weisheit ist zu hoch für den Toren; im Tor öffnet er seinen Mund nicht.","Wer sinnt, das Böse zu tun, dem nennt man einen Planer von Übel.","Der Plan des Toren ist Sünde; und ein Greuel für die Menschen ist der Spötter.","Wenn du in der Trübsal mutlos wirst, so ist deine Kraft gering.","Rette die, die zum Tod dahingehen; und laß nicht ab, die wankend dem Würgertod zugehen!","Wenn du sagst: Wir haben's ja nicht gewußt – wird der, welcher die Herzen wägt, es nicht merken?","Mein Sohn, iß Honig, denn er ist gut; und Honigseim ist süß deinem Gaumen.","Also sei die Erkenntnis der Weisheit für deine Seele; wenn du sie findest, so gibt es eine Zukunft.","Laure nicht, du Gesetzloser, auf die Wohnung des Gerechten; verheere nicht seine Ruhestätte!","Denn der Gerechte fällt siebenmal und steht wieder auf; aber die Gesetzlosen fallen ins Unglück.","Freue dich nicht, wenn dein Feind fällt, und laß dein Herz nicht frohlocken, wenn er zu Fall kommt,","damit der HERR es nicht sehe und es in seinen Augen böse sei, und damit er seinen Zorn von ihm abwende.","Zürne nicht wegen des Bösen, eifere nicht gegen die Gesetzlosen;","denn dem Bösen gibt es keine Zukunft; die Leuchte der Gesetzlosen erlischt.","Fürchte den HERRN, mein Sohn, und den König! Mische dich nicht unter die, welche wechseln wollen;","denn plötzlich erhebt sich ihr Verderben; und wer weiß das Unheil von beiden?","Auch diese Worte der Weisen: Personen zu bevorzugen im Gericht ist nicht gut.","Wer zum Gesetzlosen sagt: Du bist gerecht! den verwünschen die Völker, den verabscheuen Nationen;","aber die ihn schelten, wird es gut gehen, und auf sie wird reicher Segen kommen.","Wer eine aufrichtige Antwort gibt, küßt die Lippen.","Richte dein Werk draußen und bereite es auf dem Felde vor; dann baue dein Haus.","Sei kein falscher Zeuge wider deinen Nächsten und täusche mit deinen Lippen nicht.","Sage nicht: Wie er mir getan, so will ich ihm tun; ich will dem Manne nach seinem Werk vergelten.","Ich ging an dem Feld des Faulen vorüber und an dem Weinberg des Verständnislosen;","und siehe, es war ganz mit Nesseln bedeckt; Brennesseln hatten seine Oberfläche bedeckt, und seine Steinmauer war niedergebrochen.","Als ich das sah, richtete ich meinen Sinn darauf; ich betrachtete es und nahm Belehrung an.","Noch ein wenig schlafen, noch ein wenig schlummern, noch ein wenig die Hände falten zum Ruhen –","und deine Armut kommt wie ein Läufer, und dein Mangel wie ein bewaffneter Mann."],
+["Auch diese sind Sprüche Salomos, die die Männer Hiskias, des Königs von Juda, abschrieben.","Ehre Gottes ist es, eine Sache zu verbergen; Ehre der Könige ist es, eine Sache zu erforschen.","Der Himmel in seiner Höhe und die Erde in ihrer Tiefe und das Herz der Könige ist unerforschlich.","Sondere die Schlacken aus dem Silber, so kommt ein Gefäß für den Goldschmied heraus.","Sondere den Bösen vom König, so wird sein Thron durch Gerechtigkeit befestigt.","Stelle dich nicht zu groß vor dem König und an dem Ort der Großen stehe nicht;","denn besser ist es, daß man zu dir sagt: Tritt herauf! als daß man dich erniedrige vor dem Fürsten.","Was du mit deinen Augen gesehen hast, führe nicht schnell ins Gericht; denn was willst du am Ende machen, wenn dein Nächster dich beschämt?","Führe deinen Rechtsstreit mit deinem Nächsten aus, und enthülle nicht das Geheimnis eines anderen,","damit dich nicht beschäme, wer es hört, und dein schlechter Ruf nicht wegkomme.","Äpfel von Gold in silbernen Schalen ist ein Wort gesprochen zu seiner Zeit.","Ein goldener Ring und ein Geschmeide von Feingold ist der weise Tadler an einem gehörigen Ohr.","Wie Kälte des Schnees am Tag der Ernte ist ein treuer Bote für den, der ihn sendet.","Wie Wolken und Wind, ohne Regen, so ist ein Mensch, der mit falschen Gaben prahlt.","Durch Langmut wird ein Fürst überredet, und eine sanfte Zunge zerbricht das Gebein.","Honig hast du gefunden: iß davon, soviel dir zuträglich; damit du dir nicht zuviel davon holest und ihn von dir gibst.","Schone deinen Fuß im Haus deines Nächsten, damit er dich nicht übersatt bekomme und dich hasse.","Ein Mann, der falsches Zeugnis gegen seinen Nächsten redet, ist ein Hammer und Schwert und scharfer Pfeil.","Vertrauen in der Not eines Treulosen ist wie ein kariöser Zahn und ein strauchelnder Fuß.","Wer ein schweres Herz von Liedern trinkt, ist wie einer, der auf Natron gießt.","Wenn dein Feind hungert, speise ihn mit Brot; und wenn er dürstet, tränke ihn mit Wasser;","denn glühende Kohlen schüttest du auf sein Haupt, und der HERR wird es dir vergelten.","Der Nordwind bringt Regen und eine heimliche Zunge erzürnte Gesichter.","Besser auf einem Eckdach wohnen als mit einer zänkischen Frau in gemeinsamer Wohnung.","Wie kaltes Wasser für eine durstige Seele, so ist eine gute Botschaft aus fernem Land.","Wie die verdorbene Quelle und der verunreinigte Brunnen, so ist der Gerechte, der vor dem Gesetzlosen weicht.","Viel Honig essen ist nicht gut; und den eigenen Ruhm zu suchen ist ohne Ehre.","Wer seinen Geist nicht zu bezähmen vermag, ist wie eine gebrochene Stadt ohne Mauer."],
+["Wie Schnee im Sommer und wie Regen in der Ernte, so ziemet dem Toren die Ehre nicht.","Wie der Sperling flattert, wie die Schwalbe flieht, so trifft der grundlose Fluch nicht ein.","Für das Pferd die Peitsche, für den Esel der Zügel, und für den Rücken der Toren die Rute.","Antworte dem Toren nicht nach seiner Torheit, damit du ihm nicht gleichest.","Antworte dem Toren nach seiner Torheit, damit er nicht weise in seinen eigenen Augen sei.","Wer einen Toren als Boten abschickt, der haut sich die Füße ab und trinkt Gewalttat.","Wie die Beine des Lahmen, die schlaff herunterhängen, so ist ein Sprichwort im Munde der Toren.","Wie einer, der einen Edelstein in eine Schleuder schleudert, so ist der, der dem Toren Ehre gibt.","Wie ein Dornbusch kommt in die Hand des Betrunkenen, so ist ein Sprichwort im Munde der Toren.","Wie ein Bogenschütze, der alle verwundet, so ist der, der den Toren oder den Vorbeigehenden dingsert.","Wie ein Hund, der zu seinem Gespei zurückkehrt, so ist ein Tor, der zu seiner Torheit zurückkehrt.","Siehst du einen Mann, der weise in seinen eigenen Augen ist? Mehr Hoffnung ist für den Toren als für ihn.","Der Faule spricht: Ein Löwe ist auf dem Weg, ein Löwe auf den Plätzen.","Die Tür dreht sich in ihrer Angel, und der Faule auf seinem Bett.","Der Faule verbirgt seine Hand in der Schüssel; ihn verdrießt es, sie zum Mund zurückzubringen.","Der Faule dünkt sich weiser als sieben, die vernünftig antworten.","Wer sich in einen Streit einmischt, der ihn nichts angeht, ist wie einer, der einen Hund bei den Ohren packt.","Wie ein Rasender, der Flammen schleudert und Pfeile, den Tod,","so ist ein Mensch, der seinen Nächsten belügt und sagt: Ich scherzte doch nur!","Ohne Holz erlischt das Feuer; und wo kein Zuflüsterer ist, legt sich der Hader.","Wie Holzkohle für Glut und Holz für Feuer, so ist ein zänkischer Mann, den Streit anzufachen.","Die Worte des Zuflüsterers sind wie Leckerbissen, und sie gehen hinab in die inneren Kammern des Leibes.","Wie Silberschlacken, überzogen auf ein irdenes Gefäß, sind glatte Lippen und ein böses Herz.","Mit seinen Lippen verstellt sich der Hasser, aber in seinem Inneren hegt er Trug.","Wenn er seine Stimme lieblich macht, traue ihm nicht; denn sieben Greuel sind in seinem Herzen.","Der Haß deckt sich mit Betrug; und seine Bosheit offenbart sich in der Versammlung.","Wer eine Grube gräbt, fällt selbst hinein; und wer einen Stein wälzt, über den kehrt er zurück.","Eine lügende Zunge haßt ihre Unterdrückten, und ein schmeichelnder Mund richtet Verderben an."],
+["Rühme dich nicht des morgigen Tages; denn du weißt nicht, was ein Tag gebiert.","Es lobe dich ein anderer und nicht dein Mund, ein Fremder und nicht deine Lippen.","Schwer ist der Stein, und Sand ist eine Last; aber der Unmut eines Toren ist schwerer als beide.","Grausamkeit des Zorns und Überfluten des Zornes – aber wer besteht vor der Eifersucht?","Besser ist offene Scheltung als verborgen gehaltene Liebe.","Treu sind die Wunden des Freundes; aber trügerisch die Küsse des Feindes.","Die gesättigte Seele tritt Honigseim unter die Füße; aber der hungrigen Seele ist alles Bittere süß.","Wie ein flatternder Vogel, wie eine entflogene Schwalbe, so ist ein Mensch, der von seinem Ort wegirrt.","Öl und Räucherwerk erfreuen das Herz, und die Süßigkeit des Freundes mehr als eigene Beratung.","Verlaß deinen Freund und den Freund deines Vaters nicht und gehe nicht in das Haus deines Bruders am Tag deines Unglücks; besser ein naher Nachbar als ein ferner Bruder.","Sei weise, mein Sohn, und erfreue mein Herz, daß ich dem, der mich schmäht, antworten kann.","Der Kluge sieht das Böse und verbirgt sich; die Einfältigen gehen weiter und müssen es büßen.","Nimm sein Kleid, denn er hat für einen Fremden gebürgt; und um der Auswärtigen willen pfände ihn.","Wer seinen Nächsten früh am Morgen mit lauter Stimme segnet, dem wird es für einen Fluch gerechnet.","Ein beständiges Träufeln an einem Regentag und eine zänkische Frau sind einander gleich.","Wer sie zurückhält, hält den Wind zurück; und die Rechte ruft Öl.","Eisen wird durch Eisen geschärft, und ein Mann schärft das Angesicht seines Nächsten.","Wer seinen Feigenbaum pflegt, wird seine Früchte essen; wer auf seinen Herrn wartet, wird geehrt.","Wie das Angesicht ist im Wasser für das Angesicht, so ist das Herz des Menschen für den Menschen.","Das Totenreich und die Grube werden nicht satt; und die Augen des Menschen werden nicht satt.","Im Schmelztiegel das Silber, und im Ofen das Gold; aber den Menschen prüft sein Lob.","Auch wenn du den Toren im Mörser zerstampfst mit dem Stößel, weicht seine Torheit nicht von ihm.","Kenne genau das Aussehen deiner Kleinherden; richte dein Herz auf deine Herden;","denn der Reichtum besteht nicht für immer, und die Krone nicht von Geschlecht zu Geschlecht.","Wenn das Gras zum Vorschein kommt und junges Grün sich zeigt, und die Bergkräuter gesammelt werden,","dann sorgen die Lämmer für deine Kleidung, und die Böcke kaufen dir einen Acker,","und genug Ziegenmilch als deine Speise, als Speise deines Hauses und Nahrung für deine Mägde."],
+["Der Gesetzlose flieht, obwohl niemand jagt; aber der Gerechte ist so zuversichtlich wie ein junger Löwe.","Wegen der Übertretung des Landes sind viele seine Fürsten; aber durch einen verständigen Mann, der das Recht versteht, ist der Bestand lange.","Ein armer Mann, der die Geringen unterdrückt, ist wie ein Regen, der Brot wegspült.","Die das Gesetz verlassen, loben die Gesetzlosen; die das Gesetz halten, kämpfen gegen sie.","Böse Menschen verstehen das Recht nicht; aber die den HERRN suchen, verstehen alles.","Besser ein Armer, der in seiner Lauterkeit wandelt, als wer in seinen Wegen krumm ist, wenn er auch reich ist.","Wer das Gesetz hält, ist ein kluger Sohn; wer aber mit Schlemmern umgeht, schändet seinen Vater.","Wer seinen Reichtum durch Zins und Aufschlag mehrt, sammelt für den, der sich des Armen erbarmt.","Wer sein Ohr vom Hören des Gesetzes abwendet, sein Gebet auch ist ein Greuel.","Wer die Aufrechten auf einen schlechten Weg verführt, fällt in seine eigene Grube; aber die Lauteren werden Gutes erben.","Der Reiche ist weise in seinen eigenen Augen; aber der arme Verständige durchschaut ihn.","Wenn Gerechte jubeln, gibt es große Pracht; und wenn die Gesetzlosen aufkommen, verbirgt sich der Mensch.","Wer seine Übertretungen bedeckt, dem wird es nicht gelingen; wer aber sie bekennt und läßt, wird Erbarmen finden.","Glücklich ist der Mensch, der beständig in Furcht ist; wer aber sein Herz verhärtet, fällt ins Böse.","Wie ein brüllender Löwe und ein auf den Raub ausgehender Bär, so ist ein gesetzloser Herrscher über ein armes Volk.","Der Fürst, dem Einsicht fehlt, mehrt Unterdrückung; wer aber Gewalttaten haßt, verlängert seine Tage.","Wer belastet ist von Menschenblut, der flüchte in die Grube; man stütze ihn nicht.","Wer in Lauterkeit wandelt, wird gerettet; wer aber auf krummen Wegen geht, fällt jählings.","Wer sein Land anbaut, wird satt haben mit Brot; wer aber eitlen Dingen nachjagt, wird arm genug haben.","Ein treuer Mann hat viele Segnungen; wer aber reich werden will mit Eile, bleibt nicht ungestraft.","Person zu bevorzugen ist nicht gut; und um eines Stück Brotes wegen übertritt der Mensch.","Ein Mann mit bösem Auge eilt nach Reichtum und weiß nicht, daß ihn Mangel ankommen wird.","Wer den Menschen schmeichelt, bereitet ein Netz für seine Füße.","Wer den Armen raubt, um sich zu bereichern, und wer dem Reichen gibt, wird nur zur Armut kommen.","Wer ein Gerechter sein will, aber dem Bösen nicht widersteht, gleicht einer getrübten Quelle.","Es ist nicht gut, zum Gesetzlosen Rücksicht zu zeigen und so das Recht der Gerechten zu beugen.","Wer seinen Vater oder seine Mutter sagt: Das ist kein Vergehen! und sein Auge auf ihr Tun richtet, ist ein Gefährte des Verderbers.","Ein habgieriger Mann regt Streit an; wer aber auf den HERRN vertraut, wird gemästet."],
+["Wer, oft zurechtgewiesen, den Nacken versteift, wird plötzlich gebrochen, ohne Heilung.","Wenn die Gerechten zunehmen an Macht, so frohlockt das Volk; wenn aber der Gesetzlose herrscht, seufzt das Volk.","Ein Mann, der Weisheit liebt, erfreut seinen Vater; wer aber Huren besucht, verschwendet Gut.","Ein König, der das Land durch Recht begründet, erhält es; wer aber hohe Abgaben erhebt, reißt es nieder.","Ein Mann, der seinem Nächsten schmeichelt, breitet ein Netz für seine Schritte aus.","Im Vergehen des bösen Mannes liegt eine Schlinge; aber der Gerechte freut sich und jubelt.","Der Gerechte erkennt die Sache der Armen; der Gesetzlose hat kein Verständnis des Erkennens.","Spötterische Männer bringen die Stadt in Aufruhr; aber weise Männer wenden den Zorn.","Wenn ein weiser Mann rechtet mit einem törichten Mann, ob er zürnt oder lacht: kein Ruhe.","Blutrünstige Menschen hassen den Lauteren; aber die Aufrichtigen suchen sein Leben.","Der Tor bricht seinen ganzen Geist hinaus; aber der Weise stillt ihn bis zuletzt.","Wenn ein Herrscher auf Lügenworte hört, werden alle seine Diener gesetzlos.","Armer und Bedrücker begegnen sich; der HERR erleuchtet beider Augen.","Ein König, der die Geringen in Wahrheit richtet, sein Thron wird für immer befestigt.","Die Rute und die Zurechtweisung geben Weisheit; aber ein sich selbst überlassener Knabe beschämt seine Mutter.","Wenn die Gesetzlosen zunehmen, nimmt die Übertretung zu; aber die Gerechten werden ihren Fall sehen.","Züchtige deinen Sohn, so wird er dir Ruhe schaffen, und er wird deiner Seele Wonne geben.","Wo keine Offenbarung ist, wird das Volk zügellos; aber glücklich ist, wer das Gesetz hält.","Ein Knecht läßt sich nicht durch Worte zurechtweisen; denn wenn er versteht, so ist doch keine Antwort.","Siehst du einen Mann, der schnell mit Worten ist? Mehr Hoffnung gibt es für den Toren als für ihn.","Wer seinen Knecht von Jugend auf verzärtelt, am Ende wird er sein Sohn.","Ein zorniger Mann erregt Streit, und ein Aufbrausender hat viele Vergehen.","Der Hochmut des Menschen erniedrigt ihn; aber den Demütigen von Geist erhebt Ehre.","Wer mit dem Dieb teilt, haßt seine eigene Seele; er hört den Fluch und meldet es nicht.","Menschenfurcht legt eine Schlinge; aber wer auf den HERRN vertraut, ist in Sicherheit.","Viele suchen das Angesicht des Herrschers; aber das Recht des Menschen kommt vom HERRN.","Ein Greuel dem Gerechten ist der Ungerechte; und ein Greuel dem Gesetzlosen ist der, der geradlinig wandelt."],
+["Worte Agurs, des Sohnes Jakeh, aus Massa:","Gewiß, ich bin tölpelhafter als irgendein Mensch, und Menschenverstand habe ich nicht.","Ich habe keine Weisheit gelernt und habe keine Kenntnis der Heiligen.","Wer ist hinaufgestiegen in den Himmel und heruntergekommen? Wer hat den Wind in seinen Fäusten gesammelt? Wer hat die Wasser in ein Gewand eingebunden? Wer hat alle Enden der Erde eingesetzt? Was ist sein Name?","Jedes Wort Gottes ist geläutert; ein Schild ist er denen, die bei ihm Zuflucht suchen.","Tue nichts zu seinen Worten hinzu, damit er dich nicht tadelt und du als Lügner befunden wirst.","Zwei Dinge habe ich von dir erbeten; verweigere sie mir nicht, bevor ich sterbe:","Trug und Lügenwort entferne weit von mir; Armut und Reichtum gib mir nicht; speise mich mit meinem bestimmten Anteil an Brot,","damit ich nicht, satt geworden, leugne und sage: Wer ist der HERR? Und damit ich nicht, verarmt, stehle und mich vergreife am Namen meines Gottes.","Verleumde einen Knecht nicht vor seinem Herrn, damit er dich nicht verfluche.","Ein Geschlecht, das seinen Vater verflucht und seine Mutter nicht segnet;","ein Geschlecht, das rein ist in seinen eigenen Augen und doch von seinem Schmutz nicht gewaschen ist;","ein Geschlecht – wie erhaben sind seine Augen, und seine Augenlider erhoben;","ein Geschlecht – dessen Zähne sind Schwerter, und seine Kinnbacken Messer, um die Armen zu fressen.","Der Blutegel hat zwei Töchter: Gib! Gib! Drei sind es, die nicht satt werden, vier, die nicht sagen: Genug!","Das Totenreich und der unfruchtbare Schoß; die Erde, die vom Wasser nicht satt wird, und das Feuer, das nicht sagt: Genug!","Das Auge, das den Vater verspottet und die Mutter zu gehorchen verachtet, die Raben werden es ausstechen.","Drei sind es, die mir wunderbar sind, und vier, die ich nicht kenne:","den Weg des Adlers am Himmel, den Weg der Schlange auf dem Fels, den Weg des Schiffes mitten im Meer und den Weg eines Mannes mit einem Mädchen.","So ist der Weg des ehebrecherischen Weibes: sie ißt und wischt ihren Mund und spricht: Ich habe keine Übeltat getan.","Unter dreien erzittert die Erde, und unter vieren kann sie nicht bestehen:","unter einem Knecht, wenn er König wird, und einem Toren, wenn er satt wird mit Brot,","unter einer Unbeliebten, wenn sie heiratet, und einer Magd, wenn sie ihre Herrin beerbt.","Vier sind klein auf Erden, und sie sind weiser als die Weisen:","die Ameisen sind kein starkes Volk, und doch bereiten sie ihr Brot im Sommer;","die Klippdachse sind kein mächtiges Volk, und doch setzen sie ihr Haus im Fels;","die Heuschrecken haben keinen König, und doch ziehen sie alle geordnet aus;","die Eidechse arbeitet mit Händen und ist doch in den Palästen der Könige.","Drei sind es, die stattlich im Gang sind, und vier, die stattlich gehen:","der Löwe, der Starke unter dem Getier, der vor nichts zurückweicht;","der Hahn und der Bock, und ein König, dem kein Widerstand geleistet wird.","Wenn du töricht gehandelt hast, dich zu erheben, und wenn du Böses geplant hast, lege deine Hand auf den Mund.","Denn das Pressen der Milch bringt Butter, und das Pressen der Nase bringt Blut, und das Pressen des Zornes bringt Streit."],
+["Worte des Königs Lemuel, die seine Mutter ihn lehrte:","Was, mein Sohn? Und was, Sohn meines Leibes? Und was, Sohn meiner Gelübde?","Gib deine Kraft nicht den Weibern und deine Wege dem, was Könige vernichtet.","Nicht den Königen, o Lemuel, nicht den Königen ziemt es, Wein zu trinken, und den Fürsten nicht, starkes Getränk zu begehren,","damit sie nicht trinken und das Gesetz vergessen und das Recht all der Elenden verdrehen.","Gebt starkes Getränk dem, der umkommt, und Wein denen, die bitter bedrückt sind;","sie trinken und vergessen ihre Armut und denken nicht mehr an ihr Elend.","Tu deinen Mund auf für den Stummen, für das Recht all derer, die vergehen.","Tu deinen Mund auf, richte gerecht, führe die Sache des Armen und Bedürftigen.","Eine wackere Frau, wer findet sie? Ihr Wert übersteigt weit den Rubinen.","Das Herz ihres Mannes vertraut auf sie, und es wird kein Gewinn mangeln.","Sie tut ihm Gutes und kein Böses alle Tage ihres Lebens.","Sie sucht Wolle und Flachs und arbeitet mit Freude ihrer Hände.","Sie ist wie die Kaufmannschiffe: von weither bringt sie ihre Nahrung.","Sie steht auf, wenn es noch Nacht ist, und gibt Speise ihrem Haus und Anteil ihren Mägden.","Sie sinnt auf einen Acker und kauft ihn; von der Frucht ihrer Hände pflanzt sie einen Weinberg.","Sie gürtet ihre Lenden mit Kraft und stärkt ihre Arme.","Sie merkt, daß ihr Erwerb gut ist; ihre Lampe erlischt nicht des Nachts.","Ihre Hände streckt sie nach der Spindel aus, und ihre Hände halten das Spinnrad.","Ihre Hände öffnet sie dem Armen, und ihre Hände streckt sie aus dem Bedürftigen entgegen.","Sie fürchtet für ihr Haus nicht den Schnee; denn ihr ganzes Haus ist mit Scharlach bekleidet.","Prachtdecken macht sie sich; Byssus und Purpur ist ihre Bekleidung.","Ihr Mann ist bekannt in den Toren, wenn er sitzt bei den Ältesten des Landes.","Sie macht Leinwand und verkauft sie, und Gürtel liefert sie dem Kaufmann.","Stärke und Würde ist ihr Kleid, und sie lacht dem künftigen Tag entgegen.","Ihren Mund öffnet sie mit Weisheit, und gütige Weisung ist auf ihrer Zunge.","Sie beobachtet die Gänge ihres Hauses und ißt das Brot der Trägheit nicht.","Ihre Kinder treten auf und preisen sie glücklich; ihr Mann lobt sie und spricht:","Viele Töchter haben sich wacker gezeigt, du aber übertriffst sie alle!","Lieblichkeit ist Trug und Schönheit ist Hauch; eine Frau, die den HERRN fürchtet, die soll man loben!","Gebt ihr von der Frucht ihrer Hände, und ihre Werke sollen sie loben in den Toren."]
+];
+
+const TOTAL = CHAPTERS.length;
+const COLORS = ['#3a9a52','#2563eb','#9333ea','#dc2626','#d97706','#0891b2','#be185d','#4f7942'];
+const BLOCKS = [
+  {n:1,t:'Gott und Weisheit'},{n:2,t:'Mund und Zunge'},{n:3,t:'Herz und Seele'},
+  {n:4,t:'Gerechte und Böse'},{n:5,t:'Armut und Reichtum'},
+  {n:6,t:'Familie und Freundschaft'},{n:7,t:'Hochmut und Demut'}
+];
+
+/* ── STATE ── */
+let myName = '';
+let mySelected = new Set();   // shared between reader marks AND vote tab
+let currentChapter = 0;
+let currentTab = 'reader';
+let pickerOpen = false;
+let sortMode = 'votes';
+let minVotes = 1;
+let participants = [];        // [{name, selections:Set}]
+let readingPlan = {
+  done: new Set()   // set of plan-entry indices (0-based) marked as read
+};
+let mustHave = new Set();  // verse keys marked as "must include" in final selection
+
+/* ════════════════════════════════════════════
+   LOCALSTORAGE PERSISTENCE
+════════════════════════════════════════════ */
+const LS_KEY = 'sprueche_state_v1';
+
+// Check once at startup whether localStorage is usable at all
+function lsAvailable() {
+  try {
+    const t = '__ls_test__';
+    localStorage.setItem(t, '1');
+    localStorage.removeItem(t);
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+const LS_OK = lsAvailable();
+
+let _saveTimer = null;
+function saveState() {
+  if (!LS_OK) return;
+  // debounce: don't hammer localStorage on rapid taps
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => {
+    try {
+      const payload = JSON.stringify({
+        name: myName,
+        selected: [...mySelected],
+        chapter: currentChapter,
+        participants: participants.map(p => ({ name: p.name, selections: [...p.selections] })),
+        readingPlan: { done: [...readingPlan.done] },
+        mustHave: [...mustHave]
+      });
+      localStorage.setItem(LS_KEY, payload);
+      showSaveIndicator();
+    } catch(e) {
+      console.warn('Speichern fehlgeschlagen:', e);
+    }
+  }, 300);
+}
+
+function loadState() {
+  if (!LS_OK) {
+    console.warn('localStorage nicht verfügbar (Privatmodus oder Browser-Einstellung).');
+    return false;
+  }
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    if (s.name)         myName         = s.name;
+    if (s.selected)     mySelected     = new Set(s.selected);
+    if (typeof s.chapter === 'number') currentChapter = s.chapter;
+    if (s.participants) participants   = s.participants.map(p => ({
+      name: p.name, selections: new Set(p.selections)
+    }));
+    if (s.readingPlan) {
+      readingPlan.done = new Set(s.readingPlan.done || []);
+    }
+    if (s.mustHave) mustHave = new Set(s.mustHave);
+    return true;
+  } catch(e) {
+    console.warn('Laden fehlgeschlagen:', e);
+    return false;
+  }
+}
+
+function showSaveIndicator() {
+  // tiny green flash in the reset button to confirm save
+  const btn = document.getElementById('reset-btn');
+  if (!btn) return;
+  btn.style.color = 'var(--green-mid)';
+  setTimeout(() => { btn.style.color = ''; }, 800);
+}
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  const hadState = loadState();
+  buildReaderPages();
+  buildChapterPicker();
+  buildChapterFilter();
+  buildBlockGrid();
+  bindEvents();
+  goToChapter(currentChapter);
+  updateBadges();
+
+  // restore plan UI inputs from state
+  updateReaderChip();
+
+  if (!LS_OK) {
+    document.getElementById('user-label').textContent = '⚠ kein Speicher';
+    document.getElementById('user-pill').title =
+      'localStorage nicht verfügbar. Markierungen gehen beim Schließen verloren.\nPrivatmodus? Browser-Einstellungen prüfen.';
+    document.getElementById('user-pill').style.borderColor = '#d97706';
+    document.getElementById('name-input').focus();
+    return;
+  }
+
+  if (hadState && myName) {
+    document.getElementById('user-label').textContent = myName;
+    document.getElementById('name-input').value = myName;
+    document.getElementById('name-overlay').style.display = 'none';
+    if (participants.length) {
+      renderParticipantList();
+      document.getElementById('grp-badge').textContent = participants.length;
+    }
+    showToast(`Willkommen zurück, ${myName} – ${mySelected.size} Verse geladen.`);
+  } else {
+    document.getElementById('name-input').focus();
+  }
+});
+
+/* ════════════════════════════════════════════
+   NAME MODAL
+════════════════════════════════════════════ */
+function bindEvents() {
+  document.getElementById('name-input').addEventListener('keydown', e => { if(e.key==='Enter') confirmName(); });
+  document.getElementById('name-confirm-btn').onclick = confirmName;
+  document.getElementById('user-pill').onclick = () => {
+    document.getElementById('name-overlay').style.display = 'flex';
+    document.getElementById('name-input').value = myName;
+    setTimeout(()=>document.getElementById('name-input').focus(), 100);
+  };
+
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+
+  // Chapter nav
+  document.getElementById('prev-btn').onclick = () => goToChapter(currentChapter - 1);
+  document.getElementById('next-btn').onclick = () => goToChapter(currentChapter + 1);
+  document.getElementById('ch-indicator').onclick = togglePicker;
+  document.addEventListener('click', e => {
+    if(pickerOpen && !document.getElementById('ch-picker').contains(e.target) && e.target !== document.getElementById('ch-indicator')) closePicker();
+  });
+
+  // Reader bottom bar
+  document.getElementById('clear-marks-btn').onclick = clearAllMarks;
+  document.getElementById('show-marked-btn').onclick = openMarkedPanel;
+  document.getElementById('close-marked-btn').onclick = closeMarkedPanel;
+  document.getElementById('marked-backdrop').onclick = closeMarkedPanel;
+  document.getElementById('sheet-docx-btn').onclick = () => exportDocxFromReader();
+  document.getElementById('sheet-copy-btn').onclick = () => copyMarkedText();
+
+  // Vote tab
+  document.getElementById('search-input').addEventListener('input', renderVoteList);
+  document.getElementById('ch-filter').addEventListener('change', renderVoteList);
+  document.getElementById('clear-vote-btn').onclick = clearAllMarks;
+  document.getElementById('gen-code-btn').onclick = generateCode;
+  document.getElementById('import-code-btn').onclick = importCode;
+
+  // Code modal
+  document.getElementById('code-modal-close').onclick = () => document.getElementById('code-modal').classList.remove('open');
+  document.getElementById('code-modal-copy').onclick = copyCode;
+  document.getElementById('code-modal').onclick = e => { if(e.target===document.getElementById('code-modal')) document.getElementById('code-modal').classList.remove('open'); };
+
+  // Auswertung
+  document.getElementById('add-code-btn').onclick = addParticipantCode;
+  document.getElementById('code-paste').addEventListener('keydown', e => { if(e.key==='Enter' && e.ctrlKey) addParticipantCode(); });
+  document.querySelectorAll('.sort-btn').forEach(b => b.onclick = () => {
+    sortMode = b.dataset.sort;
+    document.querySelectorAll('.sort-btn').forEach(x => x.classList.toggle('active', x.dataset.sort===sortMode));
+    renderMatrix();
+  });
+  document.getElementById('min-votes-input').addEventListener('input', e => { minVotes=parseInt(e.target.value)||1; renderMatrix(); });
+
+  // Export
+  document.getElementById('exp-thresh').addEventListener('input', updateExportPreview);
+  document.getElementById('export-docx-btn').onclick = exportDocxConsensus;
+  document.getElementById('export-copy-btn').onclick = exportCopy;
+
+  // Swipe
+  let tx=0, ty=0, swiping=false;
+  const vp = document.getElementById('reader-viewport');
+  vp.addEventListener('touchstart', e => { tx=e.touches[0].clientX; ty=e.touches[0].clientY; swiping=false; }, {passive:true});
+  vp.addEventListener('touchmove', e => { const dx=e.touches[0].clientX-tx,dy=e.touches[0].clientY-ty; if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>12) swiping=true; }, {passive:true});
+  vp.addEventListener('touchend', e => {
+    if(!swiping) return;
+    const dx = e.changedTouches[0].clientX - tx;
+    if(Math.abs(dx)>50) dx<0 ? goToChapter(currentChapter+1) : goToChapter(currentChapter-1);
+    swiping=false;
+  }, {passive:true});
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if(currentTab==='reader') {
+      if(e.key==='ArrowRight') goToChapter(currentChapter+1);
+      if(e.key==='ArrowLeft') goToChapter(currentChapter-1);
+    }
+    if(e.key==='Escape') { closeMarkedPanel(); closePicker(); document.getElementById('code-modal').classList.remove('open'); }
+  });
+
+  // Finalauswahl
+  document.getElementById('btn-gen-code').onclick = generateFinalCode;
+  document.getElementById('btn-copy-final').onclick = copyFinalCode;
+  document.getElementById('btn-clear-final').onclick = clearFinalSelection;
+
+  // Leseplan
+  document.getElementById('jump-today-btn').onclick = () => {
+    const entry = getTodayEntry();
+    if (entry) { switchTab('reader'); goToChapter(entry.chapters[0]); }
+  };
+  document.getElementById('reader-today-chip').onclick = () => switchTab('plan');
+}
+
+function confirmName() {
+  const n = document.getElementById('name-input').value.trim();
+  if(!n) { document.getElementById('name-input').style.borderColor='#c0392b'; return; }
+  myName = n;
+  document.getElementById('user-label').textContent = n;
+  document.getElementById('name-overlay').style.display = 'none';
+  saveState();
+}
+
+/* ════════════════════════════════════════════
+   TAB SWITCHING
+════════════════════════════════════════════ */
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${tab}`).classList.add('active');
+
+  document.getElementById('ch-nav').style.display = tab==='reader' ? 'flex' : 'none';
+  document.getElementById('bb-reader').style.display = tab==='reader' ? 'flex' : 'none';
+  document.getElementById('bb-vote').style.display = tab==='vote' ? 'flex' : 'none';
+  document.getElementById('bb-other').style.display = (tab==='auswertung'||tab==='export'||tab==='plan') ? 'flex' : 'none';
+  if (tab==='plan') document.getElementById('bb-other-text').textContent = 'Kapitel antippen → direkt springen · ✓ = als gelesen markieren';
+  else document.getElementById('bb-other-text').textContent = 'Codes links einfügen → Matrix erscheint automatisch';
+
+  if(tab==='vote') renderVoteList();
+  if(tab==='auswertung') { renderMatrix(); renderFinalSection(); }
+  if(tab==='export') updateExportPreview();
+  if(tab==='plan') renderPlan();
+}
+
+/* ════════════════════════════════════════════
+   READER – BUILD & NAVIGATE
+════════════════════════════════════════════ */
+function buildReaderPages() {
+  const track = document.getElementById('chapters-track');
+  track.innerHTML = '';
+  CHAPTERS.forEach((verses, ci) => {
+    const page = document.createElement('div');
+    page.className = 'chapter-page'; page.id = `ch-page-${ci}`;
+    const inner = document.createElement('div'); inner.className = 'chapter-inner';
+    inner.innerHTML = `<div class="ch-heading">Kapitel ${ci+1}</div><div class="ch-divider"></div>`;
+    verses.forEach((text, vi) => {
+      const key = `${ci}-${vi}`;
+      const row = document.createElement('div');
+      row.className = 'verse-row' + (mySelected.has(key) ? ' marked' : '');
+      row.dataset.key = key;
+      row.innerHTML = `<div class="verse-mark-zone"><span class="verse-num">${vi+1}</span><div class="mark-dot"></div></div><div class="verse-text">${text}</div>`;
+      row.addEventListener('click', () => toggleMark(key));
+      inner.appendChild(row);
+    });
+    page.appendChild(inner); track.appendChild(page);
+  });
+}
+
+function buildChapterPicker() {
+  const grid = document.getElementById('ch-picker-grid');
+  for(let i=0;i<TOTAL;i++) {
+    const b = document.createElement('button');
+    b.className='ch-pick-btn'; b.id=`cpb-${i}`; b.textContent=i+1;
+    b.onclick = () => { goToChapter(i); closePicker(); };
+    grid.appendChild(b);
+  }
+}
+
+function goToChapter(idx) {
+  if(idx<0||idx>=TOTAL) return;
+  currentChapter = idx;
+  document.getElementById('chapters-track').style.transform = `translateX(-${idx*100}vw)`;
+  document.getElementById('ch-indicator').textContent = `Kapitel ${idx+1}`;
+  document.getElementById('prev-btn').disabled = idx===0;
+  document.getElementById('next-btn').disabled = idx===TOTAL-1;
+  document.getElementById('progress-bar').style.width = (idx/(TOTAL-1)*100)+'%';
+  setTimeout(() => { const p=document.getElementById(`ch-page-${idx}`); if(p) p.scrollTop=0; }, 220);
+  document.querySelectorAll('.ch-pick-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  updateReaderChip();
+  saveState();
+}
+
+function togglePicker() { pickerOpen ? closePicker() : openPicker(); }
+function openPicker()  { pickerOpen=true;  document.getElementById('ch-picker').classList.add('open'); }
+function closePicker() { pickerOpen=false; document.getElementById('ch-picker').classList.remove('open'); }
+
+/* ════════════════════════════════════════════
+   MARK / TOGGLE  (shared between reader + vote)
+════════════════════════════════════════════ */
+function toggleMark(key) {
+  mySelected.has(key) ? mySelected.delete(key) : mySelected.add(key);
+  document.querySelectorAll(`[data-key="${key}"]`).forEach(el => {
+    el.classList.toggle('marked', mySelected.has(key));
+    el.classList.toggle('selected', mySelected.has(key));
+  });
+  updateBadges();
+  saveState();
+}
+
+function updateBadges() {
+  const n = mySelected.size;
+  document.getElementById('my-badge').textContent = n;
+  document.getElementById('bb-badge').textContent = n;
+  document.getElementById('sel-cnt').textContent = n;
+}
+
+function clearAllMarks() {
+  if(!mySelected.size) return;
+  if(!confirm(`Alle ${mySelected.size} Markierungen löschen?`)) return;
+  mySelected.clear();
+  document.querySelectorAll('.verse-row.marked, .vote-item.selected').forEach(el => {
+    el.classList.remove('marked','selected');
+  });
+  updateBadges();
+  saveState();
+}
+
+/* ════════════════════════════════════════════
+   MARKED PANEL (Reader)
+════════════════════════════════════════════ */
+function getMarkedSorted() {
+  return [...mySelected].map(k => { const [ci,vi]=k.split('-').map(Number); return {ci,vi,k}; })
+    .sort((a,b) => a.ci!==b.ci ? a.ci-b.ci : a.vi-b.vi);
+}
+
+function openMarkedPanel() {
+  const list = document.getElementById('marked-list'); list.innerHTML='';
+  const items = getMarkedSorted();
+  if(!items.length) { list.innerHTML='<div style="text-align:center;color:var(--muted);padding:30px;font-style:italic">Noch keine Verse markiert.</div>'; }
+  else items.forEach(({ci,vi}) => {
+    const d = document.createElement('div'); d.className='m-item';
+    d.innerHTML=`<div class="m-ref">Spr ${ci+1},${vi+1}</div><div class="m-text">${CHAPTERS[ci][vi]}</div>`;
+    list.appendChild(d);
+  });
+  document.getElementById('marked-panel').classList.add('open');
+}
+function closeMarkedPanel() { document.getElementById('marked-panel').classList.remove('open'); }
+
+function copyMarkedText() {
+  const items = getMarkedSorted();
+  if(!items.length) { showToast('Keine Verse markiert.'); return; }
+  const t = items.map(({ci,vi}) => `Spr ${ci+1},${vi+1}  ${CHAPTERS[ci][vi]}`).join('\n\n');
+  navigator.clipboard.writeText(t).then(()=>showToast('Kopiert!')).catch(()=>{ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); showToast('Kopiert!'); });
+}
+
+/* ════════════════════════════════════════════
+   VOTE TAB
+════════════════════════════════════════════ */
+function buildChapterFilter() {
+  const sel = document.getElementById('ch-filter');
+  for(let i=0;i<TOTAL;i++) { const o=document.createElement('option'); o.value=i; o.textContent=`Kapitel ${i+1}`; sel.appendChild(o); }
+}
+
+function renderVoteList() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const chF = document.getElementById('ch-filter').value;
+  const list = document.getElementById('vote-list'); list.innerHTML='';
+  const cStart = chF==='' ? 0 : parseInt(chF);
+  const cEnd   = chF==='' ? TOTAL : parseInt(chF)+1;
+  let shown=0;
+  for(let ci=cStart;ci<cEnd;ci++) {
+    const matches = CHAPTERS[ci].map((t,vi)=>({t,vi})).filter(({t})=>!q||t.toLowerCase().includes(q));
+    if(!matches.length) continue;
+    const block = document.createElement('div');
+    block.innerHTML=`<div class="ch-block-label">Kapitel ${ci+1}</div>`;
+    matches.forEach(({t,vi})=>{
+      const key=`${ci}-${vi}`;
+      const item=document.createElement('div');
+      item.className='vote-item'+(mySelected.has(key)?' selected':'');
+      item.dataset.key=key;
+      item.innerHTML=`<div class="v-check">${mySelected.has(key)?'✓':''}</div><div class="v-ref">${ci+1},${vi+1}</div><div class="v-text">${t}</div>`;
+      item.onclick=()=>{ toggleMark(key); item.classList.toggle('selected',mySelected.has(key)); item.querySelector('.v-check').textContent=mySelected.has(key)?'✓':''; };
+      block.appendChild(item); shown++;
+    });
+    list.appendChild(block);
+  }
+  if(!shown) list.innerHTML='<div style="text-align:center;color:var(--muted);padding:36px;font-style:italic">Keine Verse gefunden.</div>';
+}
+
+/* ════════════════════════════════════════════
+   CODE GEN / IMPORT
+════════════════════════════════════════════ */
+function generateCode() {
+  if(!myName) { showToast('Bitte zuerst Namen eingeben.'); return; }
+  if(!mySelected.size) { showToast('Keine Verse ausgewählt.'); return; }
+  const payload = {n:myName, v:[...mySelected].sort()};
+  document.getElementById('code-output').value = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  document.getElementById('code-modal').classList.add('open');
+}
+
+function copyCode() {
+  const ta=document.getElementById('code-output'); ta.select();
+  navigator.clipboard.writeText(ta.value).then(()=>showToast('Code kopiert!')).catch(()=>{ document.execCommand('copy'); showToast('Code kopiert!'); });
+}
+
+function importCode() {
+  const code = prompt('Eigenen Code eingeben:');
+  if(!code) return;
+  try {
+    const p = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+    myName=p.n; mySelected=new Set(p.v);
+    document.getElementById('user-label').textContent=myName;
+    document.getElementById('name-input').value=myName;
+    updateBadges(); renderVoteList(); buildReaderPages();
+    showToast(`Auswahl von „${myName}" geladen (${mySelected.size} Verse).`);
+  } catch { showToast('Ungültiger Code.'); }
+}
+
+/* ════════════════════════════════════════════
+   AUSWERTUNG – PARTICIPANTS & MATRIX
+════════════════════════════════════════════ */
+function addParticipantCode() {
+  const raw=document.getElementById('code-paste').value.trim();
+  if(!raw) { showToast('Kein Code eingegeben.'); return; }
+  try {
+    const p=JSON.parse(decodeURIComponent(escape(atob(raw))));
+    const ex=participants.findIndex(x=>x.name===p.n);
+    if(ex>=0) { participants[ex].selections=new Set(p.v); showToast(`„${p.n}" aktualisiert.`); }
+    else { participants.push({name:p.n,selections:new Set(p.v)}); showToast(`„${p.n}" hinzugefügt (${p.v.length} Verse).`); }
+    document.getElementById('code-paste').value='';
+    renderParticipantList(); renderMatrix();
+    document.getElementById('grp-badge').textContent=participants.length;
+    saveState();
+  } catch(e) { showToast('Ungültiger Code: '+e.message); }
+}
+
+function renderParticipantList() {
+  const c=document.getElementById('participant-list'); c.innerHTML='';
+  if(!participants.length) { c.innerHTML='<div style="color:var(--muted);font-size:12px;font-style:italic">Noch keine Teilnehmer.</div>'; return; }
+  participants.forEach((p,i)=>{
+    const chip=document.createElement('div'); chip.className='p-chip';
+    chip.innerHTML=`<div class="p-dot" style="background:${COLORS[i%COLORS.length]}"></div><span class="p-name">${p.name}</span><span class="p-cnt">${p.selections.size}×</span><button class="p-del">✕</button>`;
+    chip.querySelector('.p-del').onclick=()=>{ participants.splice(i,1); renderParticipantList(); renderMatrix(); document.getElementById('grp-badge').textContent=participants.length; saveState(); };
+    c.appendChild(chip);
+  });
+}
+
+function getVoteCounts() {
+  const c={};
+  participants.forEach(p=>p.selections.forEach(k=>{ c[k]=(c[k]||0)+1; }));
+  return c;
+}
+
+function renderMatrix() {
+  if(!participants.length) { document.getElementById('matrix-empty').style.display=''; document.getElementById('matrix-container').style.display='none'; return; }
+  document.getElementById('matrix-empty').style.display='none'; document.getElementById('matrix-container').style.display='';
+  const counts=getVoteCounts();
+  const max=Math.max(...Object.values(counts),1);
+  minVotes=parseInt(document.getElementById('min-votes-input').value)||1;
+  let entries=Object.entries(counts).filter(([,c])=>c>=minVotes);
+  if(sortMode==='votes') entries.sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+  else entries.sort((a,b)=>{ const [aci,avi]=a[0].split('-').map(Number),[bci,bvi]=b[0].split('-').map(Number); return aci!==bci?aci-bci:avi-bvi; });
+  const tbl=document.getElementById('doodle-table'); tbl.innerHTML='';
+  const thead=tbl.createTHead(), hr=thead.insertRow();
+  const thR=document.createElement('th'); thR.className='th-ref'; thR.textContent='Vers'; hr.appendChild(thR);
+  participants.forEach((p,i)=>{ const th=document.createElement('th'); th.className='th-name'; th.style.color=COLORS[i%COLORS.length]; th.textContent=p.name; hr.appendChild(th); });
+  const thS=document.createElement('th'); thS.className='th-sum'; thS.textContent='∑'; hr.appendChild(thS);
+  const thStar=document.createElement('th'); thStar.className='th-star'; thStar.textContent='★'; hr.appendChild(thStar);
+  const tbody=tbl.createTBody();
+  entries.forEach(([key,count])=>{
+    const [ci,vi]=key.split('-').map(Number);
+    const isMust = mustHave.has(key);
+    const tr=tbody.insertRow(); tr.className='tr-v'+(count===participants.length?' tr-all':'')+(isMust?' tr-must':'');
+    const tdR=tr.insertCell(); tdR.className='td-ref';
+    tdR.innerHTML=`<div class="ref">Spr ${ci+1},${vi+1}</div><div class="vt">${CHAPTERS[ci][vi].substring(0,68)}${CHAPTERS[ci][vi].length>68?'…':''}</div>`;
+    participants.forEach(p=>{ const td=tr.insertCell(); td.className='td-dot'; td.innerHTML=p.selections.has(key)?'<span class="dot-on">✓</span>':'<span class="dot-off">·</span>'; });
+    const tdS=tr.insertCell(); tdS.className='td-sum';
+    tdS.innerHTML=`${count}<div class="cnt-bar" style="width:${Math.round(count/max*80)}%"></div>`;
+    // Star button
+    const tdStar=tr.insertCell(); tdStar.className='td-star';
+    const btnStar=document.createElement('button');
+    btnStar.className='btn-star'+(isMust?' starred':'');
+    btnStar.title=isMust?'Aus Finalauswahl entfernen':'Zur Finalauswahl hinzufügen';
+    btnStar.textContent='★';
+    btnStar.onclick=e=>{
+      e.stopPropagation();
+      if(mustHave.has(key)) mustHave.delete(key);
+      else mustHave.add(key);
+      saveState();
+      renderMatrix();
+      renderFinalSection();
+    };
+    tdStar.appendChild(btnStar);
+  });
+  if(!entries.length) { const tr=tbody.insertRow(); const td=tr.insertCell(); td.colSpan=participants.length+3; td.style.cssText='text-align:center;color:var(--muted);padding:26px;font-style:italic'; td.textContent=`Kein Vers mit mind. ${minVotes} Stimme(n).`; }
+  renderFinalSection();
+}
+
+/* ════════════════════════════════════════════
+   EXPORT – CONSENSUS PREVIEW
+════════════════════════════════════════════ */
+function getConsensusVerses(thresh) {
+  const counts=getVoteCounts();
+  return Object.entries(counts).filter(([,c])=>c>=thresh)
+    .sort((a,b)=>{ const [aci,avi]=a[0].split('-').map(Number),[bci,bvi]=b[0].split('-').map(Number); return aci!==bci?aci-bci:avi-bvi; });
+}
+
+function updateExportPreview() {
+  const thresh=parseInt(document.getElementById('exp-thresh').value)||1;
+  document.getElementById('thresh-num').textContent=thresh;
+  document.getElementById('thresh-lbl').textContent=thresh;
+  const verses=getConsensusVerses(thresh);
+  const cl=document.getElementById('consensus-list');
+  if(!participants.length) { cl.innerHTML='<em style="color:var(--muted)">Noch keine Auswertungsdaten vorhanden.</em>'; return; }
+  if(!verses.length) { cl.innerHTML=`<em style="color:var(--muted)">Kein Vers erreicht ${thresh} Stimmen.</em>`; return; }
+  cl.innerHTML=verses.map(([key,cnt])=>{ const [ci,vi]=key.split('-').map(Number); return `<div class="prev-item"><span class="prev-ref">Spr ${ci+1},${vi+1}</span>${CHAPTERS[ci][vi]} <span style="color:var(--muted);font-size:11px">[${cnt}×]</span></div>`; }).join('');
+}
+
+function buildBlockGrid() {
+  const g=document.getElementById('block-grid');
+  BLOCKS.forEach((b,i)=>{ const c=document.createElement('div'); c.className='block-card'; c.innerHTML=`<div class="block-num">Block ${b.n}</div><div class="block-name">${b.t}</div>`; c.onclick=()=>{ document.querySelectorAll('.block-card').forEach(x=>x.classList.remove('block-active')); c.classList.toggle('block-active'); }; g.appendChild(c); });
+}
+
+function exportCopy() {
+  const thresh=parseInt(document.getElementById('exp-thresh').value)||1;
+  const verses=getConsensusVerses(thresh);
+  if(!verses.length) { showToast('Keine Konsens-Verse.'); return; }
+  const t=verses.map(([key,cnt])=>{ const [ci,vi]=key.split('-').map(Number); return `Spr ${ci+1},${vi+1}  ${CHAPTERS[ci][vi]}  [${cnt}×]`; }).join('\n\n');
+  navigator.clipboard.writeText(t).then(()=>showToast('Kopiert!')).catch(()=>{ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); showToast('Kopiert!'); });
+}
+
+/* ════════════════════════════════════════════
+   DOCX EXPORTS
+════════════════════════════════════════════ */
+async function exportDocxFromReader() {
+  const items=getMarkedSorted();
+  if(!items.length) { showToast('Keine Verse markiert.'); return; }
+  await buildDocx(items.map(({ci,vi})=>({ci,vi,count:null})), `Sprueche_Markierungen_${ts()}.docx`, null);
+}
+
+async function exportDocxConsensus() {
+  const thresh=parseInt(document.getElementById('exp-thresh').value)||1;
+  const verses=getConsensusVerses(thresh);
+  if(!verses.length) { showToast('Keine Konsens-Verse.'); return; }
+  const items=verses.map(([key,cnt])=>{ const [ci,vi]=key.split('-').map(Number); return {ci,vi,count:cnt}; });
+  await buildDocx(items, `Sprueche_Konsens_${ts()}.docx`, thresh);
+}
+
+async function buildDocx(items, filename, thresh) {
+  try {
+    const {Document,Packer,Paragraph,TextRun,HeadingLevel,BorderStyle}=docx;
+    const children=[];
+    const title=thresh!=null ? 'Sprüche – Konsens-Verse Trinitatiszeit 2026' : 'Sprüche – Markierte Verse (Elberfelder 1905)';
+    children.push(new Paragraph({ children:[new TextRun({text:title,bold:true,size:30,color:'6B4F0A',font:'Garamond'})], spacing:{after:160} }));
+    if(thresh!=null && participants.length) {
+      children.push(new Paragraph({ children:[new TextRun({text:`${participants.length} Teilnehmer: ${participants.map(p=>p.name).join(', ')} · mind. ${thresh} Stimmen · ${items.length} Verse`,italics:true,size:18,color:'7a6e5e',font:'Garamond'})], spacing:{after:120} }));
+    }
+    children.push(new Paragraph({ children:[new TextRun({text:new Date().toLocaleDateString('de-DE'),italics:true,size:16,color:'7a6e5e',font:'Garamond'})], spacing:{after:360} }));
+    let lastCh=-1;
+    items.forEach(({ci,vi,count})=>{
+      if(ci!==lastCh) { children.push(new Paragraph({ children:[new TextRun({text:`Kapitel ${ci+1}`,bold:true,size:22,color:'8b6914',font:'Garamond'})], spacing:{before:260,after:60}, border:{bottom:{style:BorderStyle.SINGLE,size:4,color:'c49a2a',space:4}} })); lastCh=ci; }
+      const countStr = count!=null ? `  [${count}×]` : '';
+      children.push(new Paragraph({ children:[new TextRun({text:`${vi+1}  `,bold:true,size:16,color:'3a9a52',font:'Garamond'}),new TextRun({text:CHAPTERS[ci][vi],size:21,color:'2c2416',font:'Garamond'}),new TextRun({text:countStr,size:15,color:'7a6e5e',italics:true,font:'Garamond'})], spacing:{before:100,after:100}, indent:{left:320} }));
+    });
+    if(thresh!=null && participants.length) {
+      children.push(new Paragraph({children:[],spacing:{before:500}}));
+      children.push(new Paragraph({ children:[new TextRun({text:'Teilnehmerübersicht',bold:true,size:22,color:'8b6914',font:'Garamond'})], spacing:{after:80}, border:{bottom:{style:BorderStyle.SINGLE,size:4,color:'c49a2a',space:4}} }));
+      participants.forEach(p=>{ const refs=[...p.selections].sort().map(k=>{ const [ci,vi]=k.split('-').map(Number); return `Spr ${ci+1},${vi+1}`; }).join(' · '); children.push(new Paragraph({ children:[new TextRun({text:`${p.name}:  `,bold:true,size:18,color:'2c2416',font:'Garamond'}),new TextRun({text:refs||'(keine)',size:16,color:'7a6e5e',font:'Garamond'})], spacing:{before:80,after:80} })); });
+    }
+    const doc=new Document({sections:[{children}]});
+    const blob=await Packer.toBlob(doc);
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);
+    showToast('DOCX exportiert!');
+  } catch(e) { showToast('Fehler: '+e.message); }
+}
+
+function ts() { return new Date().toLocaleDateString('de-DE').replace(/\./g,'-'); }
+
+/* ════════════════════════════════════════════
+   LESEPLAN – NORMALPLAN (fest)
+   14. April – 16. Mai 2026 · Mo–Fr · 1–2 Kap./Tag
+════════════════════════════════════════════ */
+
+// Each entry: { date, chapters (array of 0-based indices), note }
+const NORMALPLAN = [
+  // ── Woche 1: Einleitung und Frau Weisheit (Kap. 1–6) ──
+  { date:'2026-04-13', chapters:[0],    note:'Prolog · Ruf der Weisheit' },
+  { date:'2026-04-14', chapters:[1],    note:'Suche nach Weisheit' },
+  { date:'2026-04-15', chapters:[2],    note:'Vertrauen und Segen' },
+  { date:'2026-04-16', chapters:[3],    note:'Mahnung des Vaters' },
+  { date:'2026-04-17', chapters:[4,5],  note:'Warnung · Bürgschaft und Faulheit' },
+  // ── Woche 2: Weisheit und Torheit (Kap. 7–12) ──
+  { date:'2026-04-20', chapters:[6],    note:'Die verführende Frau' },
+  { date:'2026-04-21', chapters:[7],    note:'Rede der Weisheit' },
+  { date:'2026-04-22', chapters:[8],    note:'Zwei Einladungen' },
+  { date:'2026-04-23', chapters:[9,10], note:'Erste Sprüche Salomos' },
+  { date:'2026-04-24', chapters:[11],   note:'Gerechtigkeit und Freigebigkeit' },
+  // ── Woche 3: Erste Spruchsammlung I (Kap. 13–19) ──
+  { date:'2026-04-27', chapters:[12],   note:'Klugheit und Hoffnung' },
+  { date:'2026-04-28', chapters:[13],   note:'Herz und Gottesfurcht' },
+  { date:'2026-04-29', chapters:[14,15], note:'Zunge · Pläne und Demut' },
+  { date:'2026-04-30', chapters:[16],   note:'Frieden und Freundschaft' },
+  { date:'2026-05-01', chapters:[17,18], note:'Reden und Herz · Armut' },
+  // ── Woche 4: Erste Spruchsammlung II (Kap. 20–26) ──
+  { date:'2026-05-04', chapters:[19],   note:'König und Recht' },
+  { date:'2026-05-05', chapters:[20],   note:'Gerechtigkeit und Opfer' },
+  { date:'2026-05-06', chapters:[21,22], note:'Name und Demut · Warnungen' },
+  { date:'2026-05-07', chapters:[23],   note:'Weisheit und Tapferkeit' },
+  { date:'2026-05-08', chapters:[24,25], note:'Hiskia-Sammlung · Tor und Fauler' },
+  // ── Woche 5: Schluss (Kap. 27–31) ──
+  { date:'2026-05-11', chapters:[26],   note:'Freundschaft und Klugheit' },
+  { date:'2026-05-12', chapters:[27],   note:'Gesetz, Arme, Gerechte' },
+  { date:'2026-05-13', chapters:[28],   note:'Herrschaft · Züchtigung · Vision' },
+  { date:'2026-05-14', chapters:[29],   note:'Worte Agurs · Zahlensprüche' },
+  { date:'2026-05-15', chapters:[30],   note:'Worte Lemuels · die tüchtige Frau' },
+];
+
+const PLAN_WEEKS = [
+  { label: 'Woche 1',  subtitle: 'Kap. 1–6 · Einleitung und Frau Weisheit',   days: [0,1,2,3,4] },
+  { label: 'Woche 2',  subtitle: 'Kap. 7–12 · Weisheit und Torheit',           days: [5,6,7,8,9] },
+  { label: 'Woche 3',  subtitle: 'Kap. 13–19 · Erste Spruchsammlung',          days: [10,11,12,13,14] },
+  { label: 'Woche 4',  subtitle: 'Kap. 20–26 · Zweite Spruchsammlung',         days: [15,16,17,18,19] },
+  { label: 'Woche 5',  subtitle: 'Kap. 27–31 · Schluss: Agur, Lemuel, Frau',  days: [20,21,22,23,24] },
+];
+
+const WOCHENTAGE = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+const MONATE     = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+
+function parseLocalDate(str) {
+  const [y,m,d] = str.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+function fmtDate(d) {
+  return `${WOCHENTAGE[d.getDay()]}, ${d.getDate()}. ${MONATE[d.getMonth()]}`;
+}
+function todayMidnight() {
+  const n = new Date();
+  return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+}
+
+function getTodayEntry() {
+  const td = todayMidnight();
+  return NORMALPLAN.find(e => {
+    const d = parseLocalDate(e.date);
+    return d.getTime() === td.getTime();
+  }) || null;
+}
+
+function chLabel(entry) {
+  return entry.chapters.map(ci => `Kap. ${ci + 1}`).join(' + ');
+}
+
+function updateReaderChip() {
+  const chip  = document.getElementById('reader-today-chip');
+  const entry = getTodayEntry();
+  if (!entry) { chip.classList.remove('visible'); return; }
+  chip.classList.add('visible');
+  document.getElementById('chip-label').textContent = 'HEUTE';
+  document.getElementById('chip-text').textContent  =
+    `${chLabel(entry)} · ${entry.note}`;
+}
+
+function renderPlan() {
+  const td      = todayMidnight();
+  const list    = document.getElementById('plan-list');
+  const banner  = document.getElementById('today-banner');
+  list.innerHTML = '';
+
+  // ── Today banner ─────────────────────────────────────────
+  const todayEntry = getTodayEntry();
+  if (todayEntry) {
+    banner.classList.remove('inactive');
+    document.getElementById('today-ch-label').textContent = chLabel(todayEntry);
+    document.getElementById('today-hint').textContent     = todayEntry.note;
+    document.getElementById('jump-today-btn').style.display = '';
+  } else {
+    banner.classList.add('inactive');
+    const first = parseLocalDate(NORMALPLAN[0].date);
+    const last  = parseLocalDate(NORMALPLAN[NORMALPLAN.length - 1].date);
+    if (td < first) {
+      document.getElementById('today-ch-label').textContent = 'Leseplan beginnt ' + fmtDate(first);
+      document.getElementById('today-hint').textContent     = '';
+    } else if (td > last) {
+      document.getElementById('today-ch-label').textContent = 'Normalplan abgeschlossen ✓';
+      document.getElementById('today-hint').textContent     = 'Trinitatis: 31. Mai 2026';
+    } else {
+      document.getElementById('today-ch-label').textContent = 'Kein Lesetag heute';
+      document.getElementById('today-hint').textContent     = 'Wochenende – weiter am Montag';
+    }
+    document.getElementById('jump-today-btn').style.display = 'none';
+  }
+
+  // ── Progress bar ─────────────────────────────────────────
+  const doneCount = readingPlan.done.size;
+  const total     = NORMALPLAN.length;
+  const progWrap  = document.createElement('div');
+  progWrap.className = 'plan-progress';
+  progWrap.innerHTML = `
+    <span>${doneCount} / ${total} Tage gelesen</span>
+    <div class="plan-progress-bar">
+      <div class="plan-progress-fill" style="width:${Math.round(doneCount/total*100)}%"></div>
+    </div>
+    <span>${Math.round(doneCount/total*100)} %</span>`;
+  list.appendChild(progWrap);
+
+  // ── Weeks ─────────────────────────────────────────────────
+  PLAN_WEEKS.forEach(week => {
+    const block = document.createElement('div');
+    block.className = 'plan-week-block';
+
+    const heading = document.createElement('div');
+    heading.className = 'plan-week-heading';
+    heading.innerHTML = `<span>${week.label}</span><span class="plan-week-subtitle">${week.subtitle}</span>`;
+    block.appendChild(heading);
+
+    week.days.forEach(idx => {
+      const entry   = NORMALPLAN[idx];
+      const d       = parseLocalDate(entry.date);
+      const isToday = d.getTime() === td.getTime();
+      const isPast  = d < td && !isToday;
+      const isDone  = readingPlan.done.has(idx);
+
+      const row = document.createElement('div');
+      row.className = 'plan-row'
+        + (isToday              ? ' is-today'  : '')
+        + (isPast && !isDone    ? ' is-past'   : '')
+        + (isDone && !isToday   ? ' is-done'   : '');
+
+      // Date
+      const dateDiv = document.createElement('div');
+      dateDiv.className = 'plan-date';
+      dateDiv.innerHTML = `${fmtDate(d)}<span class="wd">${d.getFullYear()}</span>`;
+
+      // Chapters
+      const chDiv = document.createElement('div');
+      chDiv.className = 'plan-chs';
+      chDiv.textContent = chLabel(entry);
+
+      // Note
+      const noteDiv = document.createElement('div');
+      noteDiv.className = 'plan-note';
+      noteDiv.textContent = entry.note;
+
+      // Today badge
+      if (isToday) {
+        const tag = document.createElement('span');
+        tag.className = 'today-tag';
+        tag.textContent = 'Heute';
+        row.appendChild(dateDiv);
+        row.appendChild(chDiv);
+        row.appendChild(noteDiv);
+        row.appendChild(tag);
+      } else {
+        row.appendChild(dateDiv);
+        row.appendChild(chDiv);
+        row.appendChild(noteDiv);
+      }
+
+      // Check button
+      const check = document.createElement('button');
+      check.className = 'plan-check' + (isDone ? ' checked' : '');
+      check.title  = isDone ? 'Als ungelesen markieren' : 'Als gelesen markieren';
+      check.textContent = '✓';
+      check.onclick = e => {
+        e.stopPropagation();
+        isDone ? readingPlan.done.delete(idx) : readingPlan.done.add(idx);
+        saveState(); renderPlan();
+      };
+      row.appendChild(check);
+
+      // Click row → jump to first chapter
+      row.addEventListener('click', () => {
+        switchTab('reader');
+        goToChapter(entry.chapters[0]);
+      });
+
+      block.appendChild(row);
+    });
+    list.appendChild(block);
+  });
+
+  // Footer note
+  const foot = document.createElement('div');
+  foot.style.cssText = 'text-align:center;color:var(--muted);font-size:12px;padding:14px 0 4px;font-style:italic';
+  foot.textContent = 'Normalplan · 13. Apr – 15. Mai 2026 · 25 Lesetage · Puffer vor Trinitatis (31. Mai)';
+  list.appendChild(foot);
+}
+
+/* ════════════════════════════════════════════
+   FINALAUSWAHL
+════════════════════════════════════════════ */
+function renderFinalSection() {
+  const sec = document.getElementById('final-section');
+  if(!participants.length) { sec.classList.add('hidden'); return; }
+  sec.classList.remove('hidden');
+
+  const n = mustHave.size;
+  document.getElementById('final-count').textContent = n + (n===1?' Vers ausgewählt':' Verse ausgewählt');
+
+  const list = document.getElementById('final-verse-list');
+  if(n === 0) {
+    list.innerHTML = '<em style="color:var(--muted);font-size:13px">Noch keine Verse markiert – ★-Button rechts in der Tabelle drücken.</em>';
+    document.getElementById('final-code-wrap').style.display = 'none';
+    document.getElementById('btn-copy-final').style.display = 'none';
+    return;
+  }
+
+  // Sorted by chapter/verse
+  const sorted = [...mustHave].map(k => {
+    const [ci,vi] = k.split('-').map(Number);
+    return {k, ci, vi};
+  }).sort((a,b) => a.ci!==b.ci ? a.ci-b.ci : a.vi-b.vi);
+
+  list.innerHTML = sorted.map(({ci,vi}) =>
+    `<div class="final-v-item">
+      <span class="final-v-ref">Spr ${ci+1},${vi+1}</span>
+      <span>${CHAPTERS[ci][vi].substring(0,65)}${CHAPTERS[ci][vi].length>65?'…':''}</span>
+    </div>`
+  ).join('');
+}
+
+function generateFinalCode() {
+  if(mustHave.size === 0) { showToast('Keine Verse ausgewählt.'); return; }
+  const sorted = [...mustHave].sort();
+  const payload = JSON.stringify({ n: 'Finalauswahl', v: sorted });
+  const code = btoa(unescape(encodeURIComponent(payload)));
+  const box = document.getElementById('final-code-box');
+  box.value = code;
+  document.getElementById('final-code-wrap').style.display = 'block';
+  document.getElementById('btn-copy-final').style.display = '';
+  showToast('Code generiert!');
+}
+
+function copyFinalCode() {
+  const box = document.getElementById('final-code-box');
+  if(!box.value) return;
+  navigator.clipboard.writeText(box.value)
+    .then(() => showToast('Code kopiert!'))
+    .catch(() => { box.select(); document.execCommand('copy'); showToast('Code kopiert!'); });
+}
+
+function clearFinalSelection() {
+  mustHave.clear();
+  document.getElementById('final-code-wrap').style.display = 'none';
+  document.getElementById('btn-copy-final').style.display = 'none';
+  saveState();
+  renderMatrix();
+  renderFinalSection();
+  showToast('Auswahl gelöscht.');
+}
+
+/* ════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════ */
+let _tt;
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(_tt); _tt=setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>
